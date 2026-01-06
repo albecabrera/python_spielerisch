@@ -1008,29 +1008,8 @@ def set_cursor_position(editor, offset):
     except:
         pass
 
-def check_syntax_errors(code):
-    """Überprüft Code auf Syntaxfehler und gibt fehlerhafte Zeilen zurück"""
-    import sys
-    from io import StringIO
-
-    error_lines = set()
-
-    # Entferne Non-Breaking Spaces (U+00A0) vor der Syntax-Prüfung
-    code = code.replace('\u00a0', ' ')
-
-    # Versuche den Code zu kompilieren
-    try:
-        compile(code, '<string>', 'exec')
-    except SyntaxError as e:
-        if e.lineno:
-            error_lines.add(e.lineno - 1)  # 0-basiert
-    except:
-        pass
-
-    return error_lines
-
 def highlight_comments():
-    """Färbt Kommentare grün, Code cyan und Fehler rot"""
+    """Färbt Kommentare grün und Code cyan - ohne Fehlermarkierung"""
     from html import escape
     editor = document['codeEditor']
 
@@ -1040,9 +1019,6 @@ def highlight_comments():
     # Hole den Text - verwende innerText statt textContent für bessere Newline-Behandlung
     text = editor.innerText if hasattr(editor, 'innerText') else editor.textContent
 
-    # Prüfe auf Syntaxfehler
-    error_lines = check_syntax_errors(text)
-
     # Färbe Kommentare und Code
     lines = text.split('\n')
     highlighted_lines = []
@@ -1051,15 +1027,9 @@ def highlight_comments():
         # Escape HTML
         escaped_line = escape(line)
 
-        # Prüfe ob Zeile einen Fehler hat
-        has_error = line_num in error_lines and line.strip() and not line.strip().startswith('#')
-
         if line.strip().startswith('#'):
             # Ganze Zeile ist Kommentar
             highlighted_lines.append(f'<div class="code-comment">{escaped_line if escaped_line else " "}</div>')
-        elif has_error:
-            # Fehlerhafte Zeile
-            highlighted_lines.append(f'<div class="code-error">{escaped_line if escaped_line else " "}</div>')
         else:
             # Normaler Code oder gemischte Zeile
             if '#' in line:
@@ -1070,10 +1040,10 @@ def highlight_comments():
                 # Nicht-leere Zeile ist Code
                 highlighted_lines.append(f'<div class="code-normal">{escaped_line}</div>')
             else:
-                # Leere Zeile - normales Leerzeichen statt &nbsp;
+                # Leere Zeile - normales Leerzeichen
                 highlighted_lines.append(f'<div> </div>')
 
-    # Setze HTML - verwende div statt br für bessere Zeilenumbrüche
+    # Setze HTML - verwende div für bessere Zeilenumbrüche
     editor.innerHTML = ''.join(highlighted_lines) if highlighted_lines else '<div><br></div>'
 
     # Stelle Cursor-Position wieder her
