@@ -401,46 +401,80 @@ LESSONS = {
         'title': 'Dein erstes Programm',
         'world': 1,
         'reward': 100,
-        'starter': '''print("Hallo Welt!")
-print("Ich lerne Python!")
-print("Das macht Spaß!")''',
+        'task': 'Schreibe 3 verschiedene print()-Befehle, um Texte auf dem Bildschirm auszugeben. Ändere die Texte nach deinem Belieben!',
+        'starter': '''# AUFGABE: Schreibe 3 print()-Befehle mit unterschiedlichen Texten
+# Beispiel: print("Dein Text hier")
+
+print("Hallo Welt!")  # <- Ändere diesen Text
+print("Ich lerne Python!")  # <- Ändere diesen Text
+print("Das macht Spaß!")  # <- Ändere diesen Text''',
         'check': lambda code, output: code.count("print(") >= 3
     },
     'lesson2': {
         'title': 'Variablen & Datentypen',
         'world': 1,
         'reward': 150,
-        'starter': '''name = "Max"
-alter = 14
+        'task': 'Erstelle mindestens 3 Variablen (Text und Zahlen) und gib sie mit print() aus. Verwende deinen eigenen Namen und deine Daten!',
+        'starter': '''# AUFGABE: Erstelle 3 Variablen und gib sie aus
+# Text-Variable: name = "Dein Name"
+# Zahlen-Variable: alter = 15
+
+name = "Max"  # <- Ändere den Namen zu deinem Namen
+alter = 14  # <- Ändere das Alter zu deinem Alter
+# <- Erstelle hier eine neue Variable (z.B. lieblingsfarbe = "blau")
+
 print("Name:", name)
-print("Alter:", alter)''',
+print("Alter:", alter)
+# <- Gib deine neue Variable aus''',
         'check': lambda code, output: code.count("=") >= 3 and code.count("print(") >= 3
     },
     'lesson3': {
         'title': 'Rechnen mit Python',
         'world': 1,
         'reward': 150,
-        'starter': '''a = 10
-b = 5
-summe = a + b
-print("Summe:", summe)''',
+        'task': 'Benutze Python als Taschenrechner! Erstelle Variablen mit Zahlen und berechne Addition (+), Subtraktion (-), Multiplikation (*) oder Division (/).',
+        'starter': '''# AUFGABE: Rechne mit Zahlen
+# Operatoren: + (plus), - (minus), * (mal), / (geteilt)
+
+a = 10  # <- Ändere diese Zahl
+b = 5   # <- Ändere diese Zahl
+
+summe = a + b  # Addition
+# <- Erstelle hier weitere Berechnungen (z.B. differenz = a - b)
+
+print("Summe:", summe)
+# <- Gib weitere Ergebnisse aus''',
         'check': lambda code, output: "+" in code or "*" in code
     },
     'lesson4': {
         'title': 'Strings & Text',
         'world': 1,
         'reward': 200,
-        'starter': '''name = "Alex"
-alter = 15
-print(f"Ich bin {name} und {alter} Jahre alt")''',
+        'task': 'Benutze f-Strings um Text und Variablen zu kombinieren. Schreibe einen Satz über dich mit f"Text {variable}".',
+        'starter': '''# AUFGABE: Kombiniere Text mit Variablen
+# f-String Format: f"Text {variable} mehr Text"
+
+name = "Alex"  # <- Ändere zu deinem Namen
+alter = 15     # <- Ändere zu deinem Alter
+# <- Füge weitere Variablen hinzu (z.B. hobby = "Gaming")
+
+print(f"Ich bin {name} und {alter} Jahre alt")
+# <- Schreibe einen weiteren Satz mit f-Strings''',
         'check': lambda code, output: "f\"" in code or "f'" in code
     },
     'lesson5': {
         'title': 'Listen & Sammlungen',
         'world': 1,
         'reward': 200,
-        'starter': '''fruechte = ["Apfel", "Banane"]
-fruechte.append("Orange")
+        'task': 'Erstelle eine Liste mit mehreren Elementen. Füge mit .append() mindestens ein neues Element hinzu und gib die Liste aus.',
+        'starter': '''# AUFGABE: Arbeite mit Listen
+# Liste erstellen: meine_liste = ["Element1", "Element2"]
+# Element hinzufügen: meine_liste.append("Neues Element")
+
+fruechte = ["Apfel", "Banane"]  # <- Ändere die Startelemente
+fruechte.append("Orange")  # <- Füge ein anderes Element hinzu
+# <- Füge noch mehr Elemente mit .append() hinzu
+
 print(fruechte)''',
         'check': lambda code, output: "append(" in code
     },
@@ -448,70 +482,127 @@ print(fruechte)''',
         'title': 'if/else Entscheidungen',
         'world': 2,
         'reward': 250,
-        'starter': '''alter = 15
+        'task': 'Schreibe eine if/else Bedingung, die eine Entscheidung trifft. Ändere die Zahl und teste beide Fälle (>=, <, ==)!',
+        'starter': '''# AUFGABE: Triff Entscheidungen mit if/else
+# Vergleiche: == (gleich), > (größer), < (kleiner), >= (größer gleich)
+
+alter = 15  # <- Ändere diese Zahl und teste
 if alter >= 18:
-    print("Erwachsen")
+    print("Erwachsen")  # <- Ändere diese Nachricht
 else:
-    print("Jugendlich")''',
+    print("Jugendlich")  # <- Ändere diese Nachricht
+
+# <- Erstelle eine weitere if/else Bedingung''',
         'check': lambda code, output: "if" in code and "else" in code
     },
     'lesson7': {
         'title': 'Schleifen (for/while)',
         'world': 2,
         'reward': 300,
-        'starter': '''for i in range(1, 6):
-    print(f"Zahl: {i}")''',
+        'task': 'Erstelle eine for-Schleife mit range(), die mehrere Zahlen durchläuft. Ändere den Bereich und experimentiere!',
+        'starter': '''# AUFGABE: Wiederhole Aktionen mit Schleifen
+# for-Schleife: for variable in range(start, ende):
+# range(1, 6) erzeugt: 1, 2, 3, 4, 5
+
+for i in range(1, 6):  # <- Ändere die Zahlen (z.B. 1, 11 für 1-10)
+    print(f"Zahl: {i}")  # <- Ändere was ausgegeben wird
+
+# <- Erstelle eine weitere Schleife (z.B. range(10, 21))''',
         'check': lambda code, output: "for" in code and "range(" in code
     },
     'lesson8': {
         'title': 'Funktionen erstellen',
         'world': 2,
         'reward': 300,
-        'starter': '''def gruesse(name):
-    print(f"Hallo {name}!")
+        'task': 'Erstelle eigene Funktionen mit def. Funktionen können Parameter haben und Aktionen ausführen. Rufe deine Funktion mehrmals auf!',
+        'starter': '''# AUFGABE: Erstelle eigene Funktionen
+# Syntax: def funktionsname(parameter):
+# Aufruf: funktionsname("Wert")
 
-gruesse("Max")''',
+def gruesse(name):  # <- Ändere den Funktionsnamen
+    print(f"Hallo {name}!")  # <- Ändere was die Funktion macht
+
+gruesse("Max")  # <- Rufe die Funktion mit verschiedenen Namen auf
+# <- Rufe die Funktion noch 2x mit anderen Namen auf
+
+# <- Erstelle eine neue Funktion (z.B. def rechne(a, b):)''',
         'check': lambda code, output: "def " in code and "return" in code or "def " in code
     },
     'lesson9': {
         'title': 'Module & Bibliotheken',
         'world': 2,
         'reward': 250,
-        'starter': '''import random
-zahl = random.randint(1, 10)
-print("Zufallszahl:", zahl)''',
+        'task': 'Importiere das random-Modul und benutze random.randint() um Zufallszahlen zu erzeugen. Experimentiere mit verschiedenen Bereichen!',
+        'starter': '''# AUFGABE: Benutze Module für zusätzliche Funktionen
+# import module_name
+# random.randint(start, ende) erzeugt Zufallszahl
+
+import random  # Importiert das random-Modul
+
+zahl = random.randint(1, 10)  # <- Ändere den Bereich (z.B. 1, 100)
+print("Zufallszahl:", zahl)
+
+# <- Erzeuge weitere Zufallszahlen mit verschiedenen Bereichen''',
         'check': lambda code, output: "import" in code
     },
     'lesson10': {
         'title': 'Klassen & Objekte',
         'world': 3,
         'reward': 400,
-        'starter': '''class Hund:
-    def __init__(self, name):
-        self.name = name
-    def bellen(self):
+        'task': 'Erstelle eine Klasse mit __init__ und mindestens einer Methode. Erstelle dann ein Objekt und rufe die Methode auf!',
+        'starter': '''# AUFGABE: Objektorientierte Programmierung
+# class Klassenname:
+#     def __init__(self, parameter): <- Konstruktor
+#     def methode(self): <- Methoden
+
+class Hund:  # <- Ändere den Klassennamen (z.B. Auto, Spieler)
+    def __init__(self, name):  # Konstruktor
+        self.name = name  # <- Füge weitere Eigenschaften hinzu
+
+    def bellen(self):  # <- Ändere/füge Methoden hinzu
         print(f"{self.name} bellt!")
 
-mein_hund = Hund("Rex")
-mein_hund.bellen()''',
+mein_hund = Hund("Rex")  # Objekt erstellen
+mein_hund.bellen()  # Methode aufrufen
+# <- Erstelle weitere Objekte und rufe Methoden auf''',
         'check': lambda code, output: "class " in code and "__init__" in code
     },
     'lesson11': {
         'title': 'Dateien lesen/schreiben',
         'world': 3,
         'reward': 350,
-        'starter': '''# Simuliert - Dateizugriff in Brython eingeschränkt
-print("Datei würde hier gespeichert")''',
+        'task': 'Simuliere das Arbeiten mit Dateien. In normalen Python würdest du open() benutzen. Erstelle Code der zeigt, was gespeichert würde.',
+        'starter': '''# AUFGABE: Dateien verarbeiten (simuliert in Brython)
+# In normalem Python: with open("datei.txt", "w") as f:
+# Hier: Simuliere was du speichern würdest
+
+dateiname = "meine_notizen.txt"  # <- Ändere den Dateinamen
+inhalt = "Das ist mein Text"  # <- Ändere den Inhalt
+
+print(f"Würde '{inhalt}' in {dateiname} speichern")
+# <- Simuliere das Lesen einer Datei
+# <- Zeige was du aus der Datei lesen würdest''',
         'check': lambda code, output: len(code) > 10
     },
     'lesson12': {
         'title': 'Eigene Spiele bauen',
         'world': 3,
         'reward': 500,
-        'starter': '''import random
-zahl = random.randint(1, 10)
+        'task': 'Erstelle ein einfaches Zahlenraten-Spiel! Benutze random für Zufallszahlen, Variablen, und print(). Erweitere das Spiel nach deinen Ideen!',
+        'starter': '''# AUFGABE: Baue dein eigenes Spiel!
+# Kombiniere alles was du gelernt hast: random, Variablen, if/else, Schleifen
+
+import random
+
+# Zahlenraten-Spiel
+zahl = random.randint(1, 10)  # <- Ändere den Bereich
 print(f"Rate die Zahl zwischen 1-10!")
-print(f"Die Zahl war: {zahl}")''',
+# <- Füge eine eigene Zahl zum Raten hinzu (raten = 5)
+# <- Vergleiche: if raten == zahl:
+print(f"Die Zahl war: {zahl}")
+
+# <- Erweitere das Spiel mit deinen Ideen!
+# <- Z.B.: Mehrere Versuche, Punkte zählen, etc.''',
         'check': lambda code, output: "import random" in code
     },
 
@@ -631,7 +722,12 @@ def load_lesson(lesson_id):
             <p style="color: #b4b7c2; margin-bottom: 20px;">
                 Belohnung: 🪙 {lesson['reward']} Robux
             </p>
-            
+
+            <div style="background: rgba(0, 162, 255, 0.1); border-left: 4px solid #00a2ff; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <h3 style="color: #00a2ff; margin: 0 0 10px 0; font-size: 16px;">📝 Deine Aufgabe:</h3>
+                <p style="color: #ffffff; margin: 0; line-height: 1.6;">{lesson['task']}</p>
+            </div>
+
             <h3 style="color: #00a2ff; margin: 20px 0 10px 0;">💻 Code-Editor:</h3>
             <textarea class="code-editor" id="codeEditor">{lesson['starter']}</textarea>
             
