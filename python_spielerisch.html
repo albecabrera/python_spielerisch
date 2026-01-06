@@ -892,6 +892,28 @@ def load_lesson(lesson_id):
     editor.bind('input', lambda e: highlight_comments())
     editor.bind('keydown', handle_editor_keydown)
 
+    # Setze Cursor nach "# Dein Code:"
+    def position_cursor():
+        text = editor.textContent
+        # Finde Position nach "# Dein Code:"
+        if "# Dein Code:" in text:
+            pos = text.index("# Dein Code:") + len("# Dein Code:")
+            # Gehe zur nächsten Zeile
+            if pos < len(text):
+                # Finde das nächste Newline
+                remaining = text[pos:]
+                newline_pos = remaining.find('\n')
+                if newline_pos >= 0:
+                    pos = pos + newline_pos + 1
+            set_cursor_position(editor, pos)
+        else:
+            # Setze Cursor ans Ende
+            set_cursor_position(editor, len(text))
+        editor.focus()
+
+    # Verzögerte Ausführung für DOM-Rendering
+    window.setTimeout(position_cursor, 100)
+
     # Aktive Lektion markieren
     for item in document.select('.lesson-item'):
         item.classList.remove('active')
@@ -907,10 +929,56 @@ def handle_editor_keydown(event):
         # Füge 4 Leerzeichen ein
         document.execCommand('insertText', False, '    ')
 
+def get_cursor_position(editor):
+    """Holt die Cursor-Position als Offset"""
+    try:
+        selection = window.getSelection()
+        if selection.rangeCount > 0:
+            range_obj = selection.getRangeAt(0)
+            preCaretRange = range_obj.cloneRange()
+            preCaretRange.selectNodeContents(editor)
+            preCaretRange.setEnd(range_obj.endContainer, range_obj.endOffset)
+            return len(preCaretRange.toString())
+    except:
+        pass
+    return 0
+
+def set_cursor_position(editor, offset):
+    """Setzt die Cursor-Position basierend auf Offset"""
+    try:
+        # Finde den richtigen Textknoten und Position
+        def find_text_node(node, offset_remaining):
+            if node.nodeType == 3:  # TEXT_NODE
+                if offset_remaining <= len(node.data):
+                    return (node, offset_remaining)
+                return (None, offset_remaining - len(node.data))
+
+            for child in node.childNodes:
+                result, offset_remaining = find_text_node(child, offset_remaining)
+                if result:
+                    return (result, offset_remaining)
+
+            return (None, offset_remaining)
+
+        text_node, pos = find_text_node(editor, offset)
+
+        if text_node:
+            selection = window.getSelection()
+            range_obj = document.createRange()
+            range_obj.setStart(text_node, pos)
+            range_obj.collapse(True)
+            selection.removeAllRanges()
+            selection.addRange(range_obj)
+    except:
+        pass
+
 def highlight_comments():
     """Färbt Kommentare im Code-Editor grün"""
     from html import escape
     editor = document['codeEditor']
+
+    # Speichere Cursor-Position
+    cursor_pos = get_cursor_position(editor)
 
     # Hole den Text
     text = editor.textContent
@@ -937,6 +1005,9 @@ def highlight_comments():
 
     # Setze HTML
     editor.innerHTML = '<br>'.join(highlighted_lines) if highlighted_lines else '<br>'
+
+    # Stelle Cursor-Position wieder her
+    set_cursor_position(editor, cursor_pos)
 
 def run_code():
     code = document['codeEditor'].textContent
@@ -1035,8 +1106,27 @@ def check_solution():
 
 def reset_code():
     lesson = LESSONS[current_lesson]
-    document['codeEditor'].textContent = lesson['starter']
+    editor = document['codeEditor']
+    editor.textContent = lesson['starter']
     highlight_comments()
+
+    # Setze Cursor nach "# Dein Code:"
+    def position_cursor():
+        text = editor.textContent
+        if "# Dein Code:" in text:
+            pos = text.index("# Dein Code:") + len("# Dein Code:")
+            if pos < len(text):
+                remaining = text[pos:]
+                newline_pos = remaining.find('\n')
+                if newline_pos >= 0:
+                    pos = pos + newline_pos + 1
+            set_cursor_position(editor, pos)
+        else:
+            set_cursor_position(editor, len(text))
+        editor.focus()
+
+    window.setTimeout(position_cursor, 100)
+
     document['output'].html = 'Keine Ausgabe'
     document['feedback'].style.display = 'none'
 
