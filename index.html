@@ -260,6 +260,30 @@
             color: #6adb8c !important;
             font-weight: 600;
         }
+
+        .code-normal {
+            color: #5dd8ff !important;
+        }
+
+        .code-error {
+            background-color: rgba(255, 0, 0, 0.2);
+            border-bottom: 2px solid #ff4444;
+            color: #ff6b6b !important;
+        }
+
+        .error-indicator {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            background: #ff4444;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            animation: pulse 1s infinite;
+            z-index: 10;
+        }
         
         .editor-buttons {
             display: flex;
@@ -542,6 +566,7 @@ LESSONS = {
 # Beispiel: print("Dein Text hier")
 
 # Dein Code:
+
 ''',
         'check': lambda code, output: code.count("print(") >= 3
     },
@@ -557,6 +582,7 @@ LESSONS = {
 # Zahlen-Variable: alter = 15
 
 # Dein Code:
+
 ''',
         'check': lambda code, output: code.count("=") >= 3 and code.count("print(") >= 3
     },
@@ -571,6 +597,7 @@ LESSONS = {
 # Beispiel: summe = 10 + 5
 
 # Dein Code:
+
 ''',
         'check': lambda code, output: "+" in code or "*" in code
     },
@@ -585,6 +612,7 @@ LESSONS = {
 # Beispiel: print(f"Ich bin {name}")
 
 # Dein Code:
+
 ''',
         'check': lambda code, output: "f\"" in code or "f'" in code
     },
@@ -599,6 +627,7 @@ LESSONS = {
 # Element hinzufügen: fruechte.append("Orange")
 
 # Dein Code:
+
 ''',
         'check': lambda code, output: "append(" in code
     },
@@ -614,6 +643,7 @@ LESSONS = {
 #     print("Erwachsen")
 
 # Dein Code:
+
 ''',
         'check': lambda code, output: "if" in code and "else" in code
     },
@@ -628,6 +658,7 @@ LESSONS = {
 # range(1, 6) erzeugt: 1, 2, 3, 4, 5
 
 # Dein Code:
+
 ''',
         'check': lambda code, output: "for" in code and "range(" in code
     },
@@ -643,6 +674,7 @@ LESSONS = {
 # Aufruf: funktionsname("Wert")
 
 # Dein Code:
+
 ''',
         'check': lambda code, output: "def " in code and "return" in code or "def " in code
     },
@@ -657,6 +689,7 @@ LESSONS = {
 # Zufallszahl erzeugen: random.randint(1, 10)
 
 # Dein Code:
+
 ''',
         'check': lambda code, output: "import" in code
     },
@@ -674,6 +707,7 @@ LESSONS = {
 #         print(f"{self.name} bellt!")
 
 # Dein Code:
+
 ''',
         'check': lambda code, output: "class " in code and "__init__" in code
     },
@@ -689,6 +723,7 @@ LESSONS = {
 # Beispiel: print(f"Würde '{text}' speichern")
 
 # Dein Code:
+
 ''',
         'check': lambda code, output: len(code) > 10
     },
@@ -706,6 +741,7 @@ LESSONS = {
 # - Zeige das Ergebnis
 
 # Dein Code:
+
 ''',
         'check': lambda code, output: "import random" in code
     },
@@ -972,8 +1008,26 @@ def set_cursor_position(editor, offset):
     except:
         pass
 
+def check_syntax_errors(code):
+    """Überprüft Code auf Syntaxfehler und gibt fehlerhafte Zeilen zurück"""
+    import sys
+    from io import StringIO
+
+    error_lines = set()
+
+    # Versuche den Code zu kompilieren
+    try:
+        compile(code, '<string>', 'exec')
+    except SyntaxError as e:
+        if e.lineno:
+            error_lines.add(e.lineno - 1)  # 0-basiert
+    except:
+        pass
+
+    return error_lines
+
 def highlight_comments():
-    """Färbt Kommentare im Code-Editor grün"""
+    """Färbt Kommentare grün, Code cyan und Fehler rot"""
     from html import escape
     editor = document['codeEditor']
 
@@ -983,24 +1037,37 @@ def highlight_comments():
     # Hole den Text
     text = editor.textContent
 
-    # Färbe Kommentare
+    # Prüfe auf Syntaxfehler
+    error_lines = check_syntax_errors(text)
+
+    # Färbe Kommentare und Code
     lines = text.split('\n')
     highlighted_lines = []
 
-    for line in lines:
+    for line_num, line in enumerate(lines):
         # Escape HTML
         escaped_line = escape(line)
+
+        # Prüfe ob Zeile einen Fehler hat
+        has_error = line_num in error_lines and line.strip() and not line.strip().startswith('#')
 
         if line.strip().startswith('#'):
             # Ganze Zeile ist Kommentar
             highlighted_lines.append(f'<span class="code-comment">{escaped_line}</span>')
+        elif has_error:
+            # Fehlerhafte Zeile
+            highlighted_lines.append(f'<span class="code-error">{escaped_line}</span>')
         else:
-            # Suche nach Kommentar in der Zeile (aber nicht in Strings)
+            # Normaler Code oder gemischte Zeile
             if '#' in line:
-                # Einfache Erkennung: Kommentar nach # (nicht perfekt, aber ausreichend)
+                # Suche nach Kommentar in der Zeile
                 parts = escaped_line.split('#', 1)
-                highlighted_lines.append(parts[0] + '<span class="code-comment">#' + parts[1] + '</span>')
+                highlighted_lines.append(f'<span class="code-normal">{parts[0]}</span><span class="code-comment">#{parts[1]}</span>')
+            elif line.strip():
+                # Nicht-leere Zeile ist Code
+                highlighted_lines.append(f'<span class="code-normal">{escaped_line}</span>')
             else:
+                # Leere Zeile
                 highlighted_lines.append(escaped_line)
 
     # Setze HTML
