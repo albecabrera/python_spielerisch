@@ -25,6 +25,29 @@
             from { transform: translateX(-100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
+
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-10deg); }
+            75% { transform: rotate(10deg); }
+        }
+
+        @keyframes unlock {
+            0% { transform: scale(1) rotate(0deg); opacity: 1; }
+            50% { transform: scale(1.5) rotate(20deg); opacity: 0.5; }
+            100% { transform: scale(0) rotate(40deg); opacity: 0; }
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
         
         .top-bar {
             background: linear-gradient(to bottom, #2b2d33, #1f2024);
@@ -120,15 +143,47 @@
             cursor: pointer;
             border-bottom: 1px solid #3a3c42;
             transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        
+
         .lesson-item:hover {
             background: rgba(0, 162, 255, 0.1);
         }
-        
+
         .lesson-item.active {
             background: rgba(0, 162, 255, 0.2);
             border-left: 3px solid #00a2ff;
+        }
+
+        .lesson-item.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: rgba(255, 0, 0, 0.05);
+        }
+
+        .lesson-item.locked:hover {
+            background: rgba(255, 0, 0, 0.05);
+        }
+
+        .lesson-lock {
+            font-size: 18px;
+            animation: shake 0.8s infinite;
+        }
+
+        .lesson-item.completed {
+            border-left: 3px solid #4ade80;
+        }
+
+        .lesson-checkmark {
+            color: #4ade80;
+            font-size: 18px;
+            animation: bounceIn 0.5s;
+        }
+
+        .lesson-title-text {
+            flex: 1;
         }
         
         .workspace {
@@ -228,6 +283,54 @@
             border-left: 4px solid #f87171;
         }
         
+        .roblox-mascot {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #2b2d33 0%, #1f2024 100%);
+            border: 2px solid #00a2ff;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0, 162, 255, 0.4);
+            z-index: 1000;
+            max-width: 300px;
+            animation: bounceIn 0.5s;
+        }
+
+        .mascot-character {
+            font-size: 60px;
+            text-align: center;
+            animation: float 2s infinite;
+            margin-bottom: 10px;
+        }
+
+        .mascot-message {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #ffffff;
+            text-align: center;
+        }
+
+        .mascot-close {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .mascot-close:hover {
+            color: #ffffff;
+        }
+
+        .unlock-animation {
+            animation: unlock 0.5s forwards;
+        }
+
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #1f2024; }
         ::-webkit-scrollbar-thumb { background: #3a3c42; border-radius: 4px; }
@@ -263,6 +366,9 @@
         </div>
     </div>
 
+    <!-- Roblox Mascot -->
+    <div id="robloxMascot" style="display: none;"></div>
+
     <script type="text/python">
 from browser import document, window, html
 import sys
@@ -273,8 +379,21 @@ import traceback
 player_data = {
     'robux': 0,
     'level': 1,
-    'completed': set()
+    'completed': set(),
+    'unlocked': {'lesson1'}  # Solo la primera lección está desbloqueada
 }
+
+# Mensajes motivacionales de la mascota
+MASCOT_MESSAGES = [
+    "¡Increíble! 🎉 ¡Has desbloqueado la siguiente lección!",
+    "¡Eres un crack! 🚀 ¡Siguiente nivel desbloqueado!",
+    "¡Genial! ⭐ ¡El candado se ha abierto!",
+    "¡Fantástico! 💪 ¡Sigue así!",
+    "¡Excelente trabajo! 🎮 ¡Nueva lección disponible!",
+    "¡Lo lograste! 🏆 ¡Continúa tu aventura!",
+    "¡Perfecto! ✨ ¡El camino continúa!",
+    "¡Bravo! 🌟 ¡Has abierto el candado!"
+]
 
 # Lektionsdaten
 LESSONS = {
@@ -420,11 +539,89 @@ def add_robux(amount):
     document['robuxCount'].text = str(player_data['robux'])
     play_success_sound()
 
+def show_mascot(message, character="🎮"):
+    """Muestra la mascota de Roblox con un mensaje motivacional"""
+    import random
+    mascot_div = document['robloxMascot']
+
+    mascot_div.html = f'''
+        <div class="roblox-mascot">
+            <button class="mascot-close" onclick="hideMascot()">×</button>
+            <div class="mascot-character">{character}</div>
+            <div class="mascot-message">{message}</div>
+        </div>
+    '''
+    mascot_div.style.display = 'block'
+
+    # Auto-ocultar después de 5 segundos
+    window.setTimeout(lambda: hide_mascot(), 5000)
+
+def hide_mascot():
+    """Oculta la mascota"""
+    mascot_div = document['robloxMascot']
+    mascot_div.style.display = 'none'
+
+def get_lesson_number(lesson_id):
+    """Obtiene el número de lección del ID"""
+    return int(lesson_id.replace('lesson', ''))
+
+def get_next_lesson_id(lesson_id):
+    """Obtiene el ID de la siguiente lección"""
+    current_num = get_lesson_number(lesson_id)
+    next_num = current_num + 1
+    next_id = f'lesson{next_num}'
+    return next_id if next_id in LESSONS else None
+
+def unlock_lesson(lesson_id):
+    """Desbloquea una lección y muestra animación"""
+    player_data['unlocked'].add(lesson_id)
+
+    # Actualizar visualmente el candado
+    try:
+        lesson_elem = document[f'lesson_{lesson_id}']
+        lesson_elem.classList.remove('locked')
+
+        # Buscar y animar el candado
+        lock_span = lesson_elem.select('.lesson-lock')
+        if lock_span:
+            lock_span[0].classList.add('unlock-animation')
+            # Remover el candado después de la animación
+            window.setTimeout(lambda: update_lesson_icons(), 500)
+    except:
+        pass
+
+def update_lesson_icons():
+    """Actualiza los iconos de todas las lecciones"""
+    for lesson_id in LESSONS.keys():
+        try:
+            lesson_elem = document[f'lesson_{lesson_id}']
+            # Limpiar iconos existentes
+            for icon in lesson_elem.select('.lesson-lock, .lesson-checkmark'):
+                icon.remove()
+
+            # Agregar icono apropiado
+            if lesson_id in player_data['completed']:
+                lesson_elem.classList.add('completed')
+                lesson_elem.classList.remove('locked')
+                checkmark = html.SPAN('✓', Class='lesson-checkmark')
+                lesson_elem <= checkmark
+            elif lesson_id not in player_data['unlocked']:
+                lesson_elem.classList.add('locked')
+                lock = html.SPAN('🔒', Class='lesson-lock')
+                lesson_elem <= lock
+        except:
+            pass
+
 def load_lesson(lesson_id):
     global current_lesson
     if lesson_id not in LESSONS:
         return
-    
+
+    # Verificar si la lección está desbloqueada (sistema escape room)
+    if lesson_id not in player_data['unlocked']:
+        show_mascot("🔒 ¡Esta lección aún está bloqueada! Completa las lecciones anteriores primero.", "🔐")
+        return
+
     current_lesson = lesson_id
     lesson = LESSONS[lesson_id]
     
@@ -484,9 +681,10 @@ def run_code():
         sys.stdout = old_stdout
 
 def check_solution():
+    import random
     lesson = LESSONS[current_lesson]
     code = document['codeEditor'].value
-    
+
     # Führe Code aus für Output
     old_stdout = sys.stdout
     sys.stdout = StringIO()
@@ -497,20 +695,38 @@ def check_solution():
         output = ""
     finally:
         sys.stdout = old_stdout
-    
+
     # Prüfe Lösung
     try:
         is_correct = lesson['check'](code, output)
     except:
         is_correct = len(code.strip()) > 10
-    
+
     feedback_div = document['feedback']
-    
+
     if is_correct:
         if current_lesson not in player_data['completed']:
             player_data['completed'].add(current_lesson)
             add_robux(lesson['reward'])
-            
+
+            # Actualizar nivel basado en lecciones completadas
+            completed_count = len(player_data['completed'])
+            new_level = (completed_count // 3) + 1
+            if new_level > player_data['level']:
+                player_data['level'] = new_level
+                document['playerLevel'].text = str(new_level)
+
+            # Desbloquear siguiente lección (sistema escape room)
+            next_lesson_id = get_next_lesson_id(current_lesson)
+            if next_lesson_id:
+                unlock_lesson(next_lesson_id)
+                # Mostrar mascota de Roblox con mensaje motivacional
+                mascot_message = random.choice(MASCOT_MESSAGES)
+                show_mascot(mascot_message, "🎮")
+            else:
+                # Mensaje especial al completar todas las lecciones
+                show_mascot("🏆 ¡FELICIDADES! ¡Has completado TODAS las lecciones! ¡Eres un maestro de Python! 🐍", "👑")
+
             feedback_div.className = 'feedback-box success'
             feedback_div.html = f'''
                 <div style="font-weight: 700; font-size: 16px; margin-bottom: 8px;">
@@ -518,6 +734,9 @@ def check_solution():
                 </div>
                 <div>Du hast {lesson['reward']} Robux verdient!</div>
             '''
+
+            # Actualizar iconos de lecciones
+            update_lesson_icons()
         else:
             feedback_div.className = 'feedback-box success'
             feedback_div.html = '<div style="font-weight: 700;">✅ Richtig!</div>'
@@ -527,7 +746,7 @@ def check_solution():
             <div style="font-weight: 700; margin-bottom: 8px;">❌ Noch nicht ganz</div>
             <div>Versuch es nochmal! Lies die Aufgabe genau.</div>
         '''
-    
+
     feedback_div.style.display = 'block'
 
 def reset_code():
@@ -540,22 +759,28 @@ def init():
     # Erstelle Lektionsliste
     worlds = {1: '🌱 Welt 1: Anfänger', 2: '🔥 Welt 2: Fortgeschritten', 3: '🚀 Welt 3: Profi'}
     lesson_list = document['lessonList']
-    
+
     current_world = 0
     for lesson_id, lesson in LESSONS.items():
         if lesson['world'] != current_world:
             current_world = lesson['world']
             world_header = html.DIV(worlds[current_world], Class='panel-header')
             lesson_list <= world_header
-        
-        lesson_item = html.DIV(
-            lesson['title'],
-            Class='lesson-item',
-            id=f'lesson_{lesson_id}'
-        )
+
+        # Crear elemento de lección con título y espacio para icono
+        lesson_title = html.SPAN(lesson['title'], Class='lesson-title-text')
+        lesson_item = html.DIV(Class='lesson-item', id=f'lesson_{lesson_id}')
+        lesson_item <= lesson_title
+
+        # Agregar candado si está bloqueada
+        if lesson_id not in player_data['unlocked']:
+            lesson_item.classList.add('locked')
+            lock_icon = html.SPAN('🔒', Class='lesson-lock')
+            lesson_item <= lock_icon
+
         lesson_item.bind('click', lambda e, lid=lesson_id: load_lesson(lid))
         lesson_list <= lesson_item
-    
+
     # Lade erste Lektion
     load_lesson('lesson1')
 
@@ -574,20 +799,13 @@ document.bind('keydown', handle_keydown)
 window.runCode = run_code
 window.checkSolution = check_solution
 window.resetCode = reset_code
+window.hideMascot = hide_mascot
 
 # Initialisiere
 init()
 
-# Willkommens-Nachricht
-feedback = document['feedback']
-feedback.className = 'feedback-box success'
-feedback.html = '''
-    <div style="font-weight: 700; font-size: 16px; margin-bottom: 8px;">
-        🎮 Willkommen bei Python!
-    </div>
-    <div>Beginne deine Lern-Reise und verdiene Robux! 🚀</div>
-'''
-feedback.style.display = 'block'
+# Willkommens-Nachricht inicial
+show_mascot("🎮 ¡Bienvenido a tu aventura Python! Completa cada lección para desbloquear la siguiente. ¡Como un Escape Room! 🔓", "🎯")
     </script>
 </body>
 </html>
