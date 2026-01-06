@@ -2,7 +2,12 @@
 
 ## 🚀 LINK DIRECTO A LA APLICACIÓN
 
-### 👉 **[https://albecabrera.github.io/python_spielerisch/](https://albecabrera.github.io/python_spielerisch/python_spielerisch.html)** 👈
+### 👉 **[CLIC AQUÍ PARA ACCEDER](https://albecabrera.github.io/python_spielerisch/)** 👈
+
+### 🔗 URL para copiar:
+```
+https://albecabrera.github.io/python_spielerisch/
+```
 
 ---
 
@@ -49,7 +54,7 @@ Plataforma interactiva de aprendizaje de Python diseñada con la estética de Ro
 
 Simplemente abre el enlace y comienza a aprender Python:
 
-**[https://albecabrera.github.io/python_spielerisch/](https://albecabrera.github.io/python_spielerisch/python_spielerisch.html)**
+**[https://albecabrera.github.io/python_spielerisch/](https://albecabrera.github.io/python_spielerisch/)**
 
 ---
 
