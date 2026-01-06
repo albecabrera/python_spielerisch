@@ -331,6 +331,89 @@
             animation: unlock 0.5s forwards;
         }
 
+        .hint-box {
+            background: rgba(255, 193, 7, 0.1);
+            border-left: 4px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .hint-box h4 {
+            color: #ffc107;
+            margin: 0 0 10px 0;
+            font-size: 16px;
+        }
+
+        .hint-box p {
+            color: #ffffff;
+            margin: 0;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .roblox-success {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: linear-gradient(135deg, #2b2d33 0%, #1f2024 100%);
+            border: 3px solid #4ade80;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(74, 222, 128, 0.6);
+            z-index: 2000;
+            animation: celebrationBounce 0.6s forwards;
+            max-width: 400px;
+        }
+
+        @keyframes celebrationBounce {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .success-character {
+            font-size: 80px;
+            text-align: center;
+            animation: float 1.5s infinite;
+            margin-bottom: 15px;
+        }
+
+        .speech-bubble {
+            position: relative;
+            background: #4ade80;
+            color: #1f2024;
+            padding: 15px 20px;
+            border-radius: 15px;
+            font-weight: 600;
+            font-size: 16px;
+            line-height: 1.5;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .speech-bubble:after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid #4ade80;
+        }
+
+        .success-reward {
+            text-align: center;
+            color: #ffc107;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #1f2024; }
         ::-webkit-scrollbar-thumb { background: #3a3c42; border-radius: 4px; }
@@ -380,19 +463,33 @@ player_data = {
     'robux': 0,
     'level': 1,
     'completed': set(),
-    'unlocked': {'lesson1'}  # Solo la primera lección está desbloqueada
+    'unlocked': {'lesson1'}  # Nur die erste Lektion ist freigeschaltet
 }
 
-# Mensajes motivacionales de la mascota
+# Motivierende Nachrichten der Maskottchen
 MASCOT_MESSAGES = [
-    "¡Increíble! 🎉 ¡Has desbloqueado la siguiente lección!",
-    "¡Eres un crack! 🚀 ¡Siguiente nivel desbloqueado!",
-    "¡Genial! ⭐ ¡El candado se ha abierto!",
-    "¡Fantástico! 💪 ¡Sigue así!",
-    "¡Excelente trabajo! 🎮 ¡Nueva lección disponible!",
-    "¡Lo lograste! 🏆 ¡Continúa tu aventura!",
-    "¡Perfecto! ✨ ¡El camino continúa!",
-    "¡Bravo! 🌟 ¡Has abierto el candado!"
+    "Unglaublich! 🎉 Du hast die nächste Lektion freigeschaltet!",
+    "Du bist ein Crack! 🚀 Nächstes Level freigeschaltet!",
+    "Genial! ⭐ Das Schloss ist offen!",
+    "Fantastisch! 💪 Weiter so!",
+    "Exzellente Arbeit! 🎮 Neue Lektion verfügbar!",
+    "Geschafft! 🏆 Dein Abenteuer geht weiter!",
+    "Perfekt! ✨ Der Weg geht weiter!",
+    "Bravo! 🌟 Du hast das Schloss geöffnet!"
+]
+
+# Kluge Ausdrücke für erfolgreiche Lösungen
+SMART_QUOTES = [
+    "Programmieren ist wie Magie - nur mit mehr Logik! ✨",
+    "Code ist Poesie für Computer! 💻",
+    "Ein Programmierer ist ein Problemlöser! 🧠",
+    "Fehler sind nur Lernchancen verkleidet! 🎯",
+    "Von null auf Held - ein print() nach dem anderen! 🚀",
+    "Du bist auf dem Weg zum Python-Meister! 🐍",
+    "Jede Codezeile bringt dich weiter! 💪",
+    "Debugging ist wie Detektivarbeit! 🔍",
+    "Clean Code ist glücklicher Code! 😊",
+    "Du denkst schon wie ein Programmierer! 🎮"
 ]
 
 # Lektionsdaten
@@ -401,80 +498,57 @@ LESSONS = {
         'title': 'Dein erstes Programm',
         'world': 1,
         'reward': 100,
-        'task': 'Schreibe 3 verschiedene print()-Befehle, um Texte auf dem Bildschirm auszugeben. Ändere die Texte nach deinem Belieben!',
-        'starter': '''# AUFGABE: Schreibe 3 print()-Befehle mit unterschiedlichen Texten
-# Beispiel: print("Dein Text hier")
-
-print("Hallo Welt!")  # <- Ändere diesen Text
-print("Ich lerne Python!")  # <- Ändere diesen Text
-print("Das macht Spaß!")  # <- Ändere diesen Text''',
+        'task': 'Schreibe 3 verschiedene print()-Befehle.',
+        'hint': 'Mit print() kannst du Text ausgeben. Beispiel: print("Hallo")\nSchreibe 3 verschiedene print()-Zeilen mit unterschiedlichen Texten.',
+        'starter': '''print("Hallo Welt!")
+print("Ich lerne Python!")
+print("Das macht Spaß!")''',
         'check': lambda code, output: code.count("print(") >= 3
     },
     'lesson2': {
         'title': 'Variablen & Datentypen',
         'world': 1,
         'reward': 150,
-        'task': 'Erstelle mindestens 3 Variablen (Text und Zahlen) und gib sie mit print() aus. Verwende deinen eigenen Namen und deine Daten!',
-        'starter': '''# AUFGABE: Erstelle 3 Variablen und gib sie aus
-# Text-Variable: name = "Dein Name"
-# Zahlen-Variable: alter = 15
-
-name = "Max"  # <- Ändere den Namen zu deinem Namen
-alter = 14  # <- Ändere das Alter zu deinem Alter
-# <- Erstelle hier eine neue Variable (z.B. lieblingsfarbe = "blau")
+        'task': 'Erstelle 3 Variablen und gib sie aus.',
+        'hint': 'Variablen speichern Werte. Beispiel: name = "Max"\nErstelle 3 Variablen (Text und Zahlen) und gib sie mit print() aus.',
+        'starter': '''name = "Max"
+alter = 14
 
 print("Name:", name)
-print("Alter:", alter)
-# <- Gib deine neue Variable aus''',
+print("Alter:", alter)''',
         'check': lambda code, output: code.count("=") >= 3 and code.count("print(") >= 3
     },
     'lesson3': {
         'title': 'Rechnen mit Python',
         'world': 1,
         'reward': 150,
-        'task': 'Benutze Python als Taschenrechner! Erstelle Variablen mit Zahlen und berechne Addition (+), Subtraktion (-), Multiplikation (*) oder Division (/).',
-        'starter': '''# AUFGABE: Rechne mit Zahlen
-# Operatoren: + (plus), - (minus), * (mal), / (geteilt)
-
-a = 10  # <- Ändere diese Zahl
-b = 5   # <- Ändere diese Zahl
-
-summe = a + b  # Addition
-# <- Erstelle hier weitere Berechnungen (z.B. differenz = a - b)
-
-print("Summe:", summe)
-# <- Gib weitere Ergebnisse aus''',
+        'task': 'Benutze Python als Taschenrechner.',
+        'hint': 'Operatoren: + (plus), - (minus), * (mal), / (geteilt)\nBeispiel: summe = 10 + 5\nErstelle Variablen und berechne damit.',
+        'starter': '''a = 10
+b = 5
+summe = a + b
+print("Summe:", summe)''',
         'check': lambda code, output: "+" in code or "*" in code
     },
     'lesson4': {
         'title': 'Strings & Text',
         'world': 1,
         'reward': 200,
-        'task': 'Benutze f-Strings um Text und Variablen zu kombinieren. Schreibe einen Satz über dich mit f"Text {variable}".',
-        'starter': '''# AUFGABE: Kombiniere Text mit Variablen
-# f-String Format: f"Text {variable} mehr Text"
-
-name = "Alex"  # <- Ändere zu deinem Namen
-alter = 15     # <- Ändere zu deinem Alter
-# <- Füge weitere Variablen hinzu (z.B. hobby = "Gaming")
-
-print(f"Ich bin {name} und {alter} Jahre alt")
-# <- Schreibe einen weiteren Satz mit f-Strings''',
+        'task': 'Kombiniere Text und Variablen mit f-Strings.',
+        'hint': 'f-String Format: f"Text {variable} mehr Text"\nBeispiel: print(f"Hallo {name}")\nSchreibe einen Satz über dich.',
+        'starter': '''name = "Alex"
+alter = 15
+print(f"Ich bin {name} und {alter} Jahre alt")''',
         'check': lambda code, output: "f\"" in code or "f'" in code
     },
     'lesson5': {
         'title': 'Listen & Sammlungen',
         'world': 1,
         'reward': 200,
-        'task': 'Erstelle eine Liste mit mehreren Elementen. Füge mit .append() mindestens ein neues Element hinzu und gib die Liste aus.',
-        'starter': '''# AUFGABE: Arbeite mit Listen
-# Liste erstellen: meine_liste = ["Element1", "Element2"]
-# Element hinzufügen: meine_liste.append("Neues Element")
-
-fruechte = ["Apfel", "Banane"]  # <- Ändere die Startelemente
-fruechte.append("Orange")  # <- Füge ein anderes Element hinzu
-# <- Füge noch mehr Elemente mit .append() hinzu
-
+        'task': 'Arbeite mit Listen und füge Elemente hinzu.',
+        'hint': 'Liste erstellen: meine_liste = ["Element1", "Element2"]\nElement hinzufügen: meine_liste.append("Neues")\nNutze .append() um Elemente hinzuzufügen.',
+        'starter': '''fruechte = ["Apfel", "Banane"]
+fruechte.append("Orange")
 print(fruechte)''',
         'check': lambda code, output: "append(" in code
     },
@@ -482,127 +556,88 @@ print(fruechte)''',
         'title': 'if/else Entscheidungen',
         'world': 2,
         'reward': 250,
-        'task': 'Schreibe eine if/else Bedingung, die eine Entscheidung trifft. Ändere die Zahl und teste beide Fälle (>=, <, ==)!',
-        'starter': '''# AUFGABE: Triff Entscheidungen mit if/else
-# Vergleiche: == (gleich), > (größer), < (kleiner), >= (größer gleich)
-
-alter = 15  # <- Ändere diese Zahl und teste
+        'task': 'Triff Entscheidungen mit if/else.',
+        'hint': 'Vergleiche: == (gleich), > (größer), < (kleiner), >= (größer gleich)\nBeispiel: if alter >= 18:\nSchreibe eine if/else Bedingung.',
+        'starter': '''alter = 15
 if alter >= 18:
-    print("Erwachsen")  # <- Ändere diese Nachricht
+    print("Erwachsen")
 else:
-    print("Jugendlich")  # <- Ändere diese Nachricht
-
-# <- Erstelle eine weitere if/else Bedingung''',
+    print("Jugendlich")''',
         'check': lambda code, output: "if" in code and "else" in code
     },
     'lesson7': {
         'title': 'Schleifen (for/while)',
         'world': 2,
         'reward': 300,
-        'task': 'Erstelle eine for-Schleife mit range(), die mehrere Zahlen durchläuft. Ändere den Bereich und experimentiere!',
-        'starter': '''# AUFGABE: Wiederhole Aktionen mit Schleifen
-# for-Schleife: for variable in range(start, ende):
-# range(1, 6) erzeugt: 1, 2, 3, 4, 5
-
-for i in range(1, 6):  # <- Ändere die Zahlen (z.B. 1, 11 für 1-10)
-    print(f"Zahl: {i}")  # <- Ändere was ausgegeben wird
-
-# <- Erstelle eine weitere Schleife (z.B. range(10, 21))''',
+        'task': 'Wiederhole Aktionen mit einer for-Schleife.',
+        'hint': 'for-Schleife: for variable in range(start, ende):\nBeispiel: for i in range(1, 6):\nrange(1, 6) erzeugt die Zahlen 1, 2, 3, 4, 5',
+        'starter': '''for i in range(1, 6):
+    print(f"Zahl: {i}")''',
         'check': lambda code, output: "for" in code and "range(" in code
     },
     'lesson8': {
         'title': 'Funktionen erstellen',
         'world': 2,
         'reward': 300,
-        'task': 'Erstelle eigene Funktionen mit def. Funktionen können Parameter haben und Aktionen ausführen. Rufe deine Funktion mehrmals auf!',
-        'starter': '''# AUFGABE: Erstelle eigene Funktionen
-# Syntax: def funktionsname(parameter):
-# Aufruf: funktionsname("Wert")
+        'task': 'Erstelle eigene Funktionen.',
+        'hint': 'Syntax: def funktionsname(parameter):\nAufruf: funktionsname("Wert")\nFunktionen können mehrmals aufgerufen werden.',
+        'starter': '''def gruesse(name):
+    print(f"Hallo {name}!")
 
-def gruesse(name):  # <- Ändere den Funktionsnamen
-    print(f"Hallo {name}!")  # <- Ändere was die Funktion macht
-
-gruesse("Max")  # <- Rufe die Funktion mit verschiedenen Namen auf
-# <- Rufe die Funktion noch 2x mit anderen Namen auf
-
-# <- Erstelle eine neue Funktion (z.B. def rechne(a, b):)''',
+gruesse("Max")''',
         'check': lambda code, output: "def " in code and "return" in code or "def " in code
     },
     'lesson9': {
         'title': 'Module & Bibliotheken',
         'world': 2,
         'reward': 250,
-        'task': 'Importiere das random-Modul und benutze random.randint() um Zufallszahlen zu erzeugen. Experimentiere mit verschiedenen Bereichen!',
-        'starter': '''# AUFGABE: Benutze Module für zusätzliche Funktionen
-# import module_name
-# random.randint(start, ende) erzeugt Zufallszahl
-
-import random  # Importiert das random-Modul
-
-zahl = random.randint(1, 10)  # <- Ändere den Bereich (z.B. 1, 100)
-print("Zufallszahl:", zahl)
-
-# <- Erzeuge weitere Zufallszahlen mit verschiedenen Bereichen''',
+        'task': 'Benutze das random-Modul.',
+        'hint': 'Module importieren: import random\nZufallszahl: random.randint(start, ende)\nBeispiel: random.randint(1, 10)',
+        'starter': '''import random
+zahl = random.randint(1, 10)
+print("Zufallszahl:", zahl)''',
         'check': lambda code, output: "import" in code
     },
     'lesson10': {
         'title': 'Klassen & Objekte',
         'world': 3,
         'reward': 400,
-        'task': 'Erstelle eine Klasse mit __init__ und mindestens einer Methode. Erstelle dann ein Objekt und rufe die Methode auf!',
-        'starter': '''# AUFGABE: Objektorientierte Programmierung
-# class Klassenname:
-#     def __init__(self, parameter): <- Konstruktor
-#     def methode(self): <- Methoden
+        'task': 'Erstelle eine Klasse mit Eigenschaften und Methoden.',
+        'hint': 'class Klassenname:\n    def __init__(self, parameter):\n        self.eigenschaft = parameter\n    def methode(self):\n        print("Etwas")\nObjekt erstellen: obj = Klassenname("Wert")',
+        'starter': '''class Hund:
+    def __init__(self, name):
+        self.name = name
 
-class Hund:  # <- Ändere den Klassennamen (z.B. Auto, Spieler)
-    def __init__(self, name):  # Konstruktor
-        self.name = name  # <- Füge weitere Eigenschaften hinzu
-
-    def bellen(self):  # <- Ändere/füge Methoden hinzu
+    def bellen(self):
         print(f"{self.name} bellt!")
 
-mein_hund = Hund("Rex")  # Objekt erstellen
-mein_hund.bellen()  # Methode aufrufen
-# <- Erstelle weitere Objekte und rufe Methoden auf''',
+mein_hund = Hund("Rex")
+mein_hund.bellen()''',
         'check': lambda code, output: "class " in code and "__init__" in code
     },
     'lesson11': {
         'title': 'Dateien lesen/schreiben',
         'world': 3,
         'reward': 350,
-        'task': 'Simuliere das Arbeiten mit Dateien. In normalen Python würdest du open() benutzen. Erstelle Code der zeigt, was gespeichert würde.',
-        'starter': '''# AUFGABE: Dateien verarbeiten (simuliert in Brython)
-# In normalem Python: with open("datei.txt", "w") as f:
-# Hier: Simuliere was du speichern würdest
+        'task': 'Simuliere das Arbeiten mit Dateien.',
+        'hint': 'In normalem Python: with open("datei.txt", "w") as f:\nHier in Brython: Simuliere was gespeichert würde.\nZeige mit print() was in einer Datei stehen würde.',
+        'starter': '''dateiname = "meine_notizen.txt"
+inhalt = "Das ist mein Text"
 
-dateiname = "meine_notizen.txt"  # <- Ändere den Dateinamen
-inhalt = "Das ist mein Text"  # <- Ändere den Inhalt
-
-print(f"Würde '{inhalt}' in {dateiname} speichern")
-# <- Simuliere das Lesen einer Datei
-# <- Zeige was du aus der Datei lesen würdest''',
+print(f"Würde '{inhalt}' in {dateiname} speichern")''',
         'check': lambda code, output: len(code) > 10
     },
     'lesson12': {
         'title': 'Eigene Spiele bauen',
         'world': 3,
         'reward': 500,
-        'task': 'Erstelle ein einfaches Zahlenraten-Spiel! Benutze random für Zufallszahlen, Variablen, und print(). Erweitere das Spiel nach deinen Ideen!',
-        'starter': '''# AUFGABE: Baue dein eigenes Spiel!
-# Kombiniere alles was du gelernt hast: random, Variablen, if/else, Schleifen
+        'task': 'Baue ein Spiel mit allem was du gelernt hast!',
+        'hint': 'Kombiniere: random, Variablen, if/else, Schleifen, Funktionen\nBeispiel-Spiel: Zahlenraten\nErstelle eine Zufallszahl und vergleiche sie mit einer Eingabe.',
+        'starter': '''import random
 
-import random
-
-# Zahlenraten-Spiel
-zahl = random.randint(1, 10)  # <- Ändere den Bereich
+zahl = random.randint(1, 10)
 print(f"Rate die Zahl zwischen 1-10!")
-# <- Füge eine eigene Zahl zum Raten hinzu (raten = 5)
-# <- Vergleiche: if raten == zahl:
-print(f"Die Zahl war: {zahl}")
-
-# <- Erweitere das Spiel mit deinen Ideen!
-# <- Z.B.: Mehrere Versuche, Punkte zählen, etc.''',
+print(f"Die Zahl war: {zahl}")''',
         'check': lambda code, output: "import random" in code
     },
 
@@ -631,7 +666,7 @@ def add_robux(amount):
     play_success_sound()
 
 def show_mascot(message, character="🎮"):
-    """Muestra la mascota de Roblox con un mensaje motivacional"""
+    """Zeigt das Roblox-Maskottchen mit motivierender Nachricht"""
     import random
     mascot_div = document['robloxMascot']
 
@@ -644,53 +679,81 @@ def show_mascot(message, character="🎮"):
     '''
     mascot_div.style.display = 'block'
 
-    # Auto-ocultar después de 5 segundos
+    # Auto-verstecken nach 5 Sekunden
     window.setTimeout(lambda: hide_mascot(), 5000)
 
 def hide_mascot():
-    """Oculta la mascota"""
+    """Versteckt das Maskottchen"""
     mascot_div = document['robloxMascot']
     mascot_div.style.display = 'none'
 
+def toggle_hint():
+    """Zeigt/Versteckt den Hinweis"""
+    hint_box = document['hintBox']
+    if hint_box.style.display == 'none' or hint_box.style.display == '':
+        hint_box.style.display = 'block'
+    else:
+        hint_box.style.display = 'none'
+
+def show_success_character(smart_quote, reward):
+    """Zeigt eine Roblox-Figur mit Sprechblase bei erfolgreicher Lösung"""
+    import random
+
+    characters = ["🎮", "🎯", "⭐", "🏆", "🚀", "💎", "👾", "🎪"]
+    character = random.choice(characters)
+
+    success_div = document['robloxMascot']
+    success_div.html = f'''
+        <div class="roblox-success">
+            <div class="success-character">{character}</div>
+            <div class="speech-bubble">{smart_quote}</div>
+            <div class="success-reward">+{reward} Robux verdient! 🪙</div>
+        </div>
+    '''
+    success_div.style.display = 'block'
+
+    # Auto-verstecken nach 5 Sekunden
+    window.setTimeout(lambda: hide_mascot(), 5000)
+
 def get_lesson_number(lesson_id):
-    """Obtiene el número de lección del ID"""
+    """Holt die Lektionsnummer aus der ID"""
     return int(lesson_id.replace('lesson', ''))
 
 def get_next_lesson_id(lesson_id):
-    """Obtiene el ID de la siguiente lección"""
+    """Holt die ID der nächsten Lektion"""
     current_num = get_lesson_number(lesson_id)
     next_num = current_num + 1
     next_id = f'lesson{next_num}'
     return next_id if next_id in LESSONS else None
 
 def unlock_lesson(lesson_id):
-    """Desbloquea una lección y muestra animación"""
+    """Schaltet eine Lektion frei und zeigt Animation"""
     player_data['unlocked'].add(lesson_id)
 
-    # Actualizar visualmente el candado
+    # Schloss visuell aktualisieren
     try:
         lesson_elem = document[f'lesson_{lesson_id}']
         lesson_elem.classList.remove('locked')
 
-        # Buscar y animar el candado
+        # Schloss suchen und animieren
         lock_span = lesson_elem.select('.lesson-lock')
         if lock_span:
             lock_span[0].classList.add('unlock-animation')
-            # Remover el candado después de la animación
+            # Schloss nach Animation entfernen
             window.setTimeout(lambda: update_lesson_icons(), 500)
     except:
         pass
 
 def update_lesson_icons():
-    """Actualiza los iconos de todas las lecciones"""
+    """Aktualisiert die Icons aller Lektionen"""
     for lesson_id in LESSONS.keys():
         try:
             lesson_elem = document[f'lesson_{lesson_id}']
-            # Limpiar iconos existentes
+            # Vorhandene Icons entfernen
             for icon in lesson_elem.select('.lesson-lock, .lesson-checkmark'):
                 icon.remove()
 
-            # Agregar icono apropiado
+            # Passendes Icon hinzufügen
             if lesson_id in player_data['completed']:
                 lesson_elem.classList.add('completed')
                 lesson_elem.classList.remove('locked')
@@ -708,14 +771,14 @@ def load_lesson(lesson_id):
     if lesson_id not in LESSONS:
         return
 
-    # Verificar si la lección está desbloqueada (sistema escape room)
+    # Überprüfen ob die Lektion freigeschaltet ist (Escape Room System)
     if lesson_id not in player_data['unlocked']:
-        show_mascot("🔒 ¡Esta lección aún está bloqueada! Completa las lecciones anteriores primero.", "🔐")
+        show_mascot("🔒 Diese Lektion ist noch gesperrt! Löse zuerst die vorherigen Lektionen.", "🔐")
         return
 
     current_lesson = lesson_id
     lesson = LESSONS[lesson_id]
-    
+
     content = f'''
         <div class="lesson-card">
             <h2 class="lesson-title">🎮 {lesson['title']}</h2>
@@ -728,18 +791,24 @@ def load_lesson(lesson_id):
                 <p style="color: #ffffff; margin: 0; line-height: 1.6;">{lesson['task']}</p>
             </div>
 
+            <div class="hint-box" id="hintBox">
+                <h4>💡 Hinweis:</h4>
+                <p>{lesson['hint']}</p>
+            </div>
+
             <h3 style="color: #00a2ff; margin: 20px 0 10px 0;">💻 Code-Editor:</h3>
             <textarea class="code-editor" id="codeEditor">{lesson['starter']}</textarea>
-            
+
             <div class="editor-buttons">
                 <button class="editor-btn" onclick="runCode()">▶️ Ausführen (F5)</button>
                 <button class="editor-btn submit" onclick="checkSolution()">✅ Lösung prüfen</button>
+                <button class="editor-btn" onclick="toggleHint()">💡 Hinweis</button>
                 <button class="editor-btn" onclick="resetCode()">🔄 Zurücksetzen</button>
             </div>
-            
+
             <h3 style="color: #00a2ff; margin: 20px 0 10px 0;">📟 Ausgabe:</h3>
             <div class="output-panel" id="output">Keine Ausgabe</div>
-            
+
             <div class="feedback-box" id="feedback"></div>
         </div>
     '''
@@ -805,23 +874,27 @@ def check_solution():
             player_data['completed'].add(current_lesson)
             add_robux(lesson['reward'])
 
-            # Actualizar nivel basado en lecciones completadas
+            # Zeige Roblox-Figur mit kluger Aussage
+            smart_quote = random.choice(SMART_QUOTES)
+            show_success_character(smart_quote, lesson['reward'])
+
+            # Level basierend auf abgeschlossenen Lektionen aktualisieren
             completed_count = len(player_data['completed'])
             new_level = (completed_count // 3) + 1
             if new_level > player_data['level']:
                 player_data['level'] = new_level
                 document['playerLevel'].text = str(new_level)
 
-            # Desbloquear siguiente lección (sistema escape room)
+            # Nächste Lektion freischalten (Escape Room System)
             next_lesson_id = get_next_lesson_id(current_lesson)
             if next_lesson_id:
                 unlock_lesson(next_lesson_id)
-                # Mostrar mascota de Roblox con mensaje motivacional
+                # Zeige Maskottchen mit motivierender Nachricht
                 mascot_message = random.choice(MASCOT_MESSAGES)
-                show_mascot(mascot_message, "🎮")
+                window.setTimeout(lambda: show_mascot(mascot_message, "🎮"), 5500)
             else:
-                # Mensaje especial al completar todas las lecciones
-                show_mascot("🏆 ¡FELICIDADES! ¡Has completado TODAS las lecciones! ¡Eres un maestro de Python! 🐍", "👑")
+                # Spezielle Nachricht beim Abschluss aller Lektionen
+                window.setTimeout(lambda: show_mascot("🏆 HERZLICHEN GLÜCKWUNSCH! Du hast ALLE Lektionen abgeschlossen! Du bist ein Python-Meister! 🐍", "👑"), 5500)
 
             feedback_div.className = 'feedback-box success'
             feedback_div.html = f'''
@@ -831,7 +904,7 @@ def check_solution():
                 <div>Du hast {lesson['reward']} Robux verdient!</div>
             '''
 
-            # Actualizar iconos de lecciones
+            # Lektions-Icons aktualisieren
             update_lesson_icons()
         else:
             feedback_div.className = 'feedback-box success'
@@ -863,12 +936,12 @@ def init():
             world_header = html.DIV(worlds[current_world], Class='panel-header')
             lesson_list <= world_header
 
-        # Crear elemento de lección con título y espacio para icono
+        # Lektionselement mit Titel und Platz für Icon erstellen
         lesson_title = html.SPAN(lesson['title'], Class='lesson-title-text')
         lesson_item = html.DIV(Class='lesson-item', id=f'lesson_{lesson_id}')
         lesson_item <= lesson_title
 
-        # Agregar candado si está bloqueada
+        # Schloss hinzufügen wenn gesperrt
         if lesson_id not in player_data['unlocked']:
             lesson_item.classList.add('locked')
             lock_icon = html.SPAN('🔒', Class='lesson-lock')
@@ -896,12 +969,13 @@ window.runCode = run_code
 window.checkSolution = check_solution
 window.resetCode = reset_code
 window.hideMascot = hide_mascot
+window.toggleHint = toggle_hint
 
 # Initialisiere
 init()
 
-# Willkommens-Nachricht inicial
-show_mascot("🎮 ¡Bienvenido a tu aventura Python! Completa cada lección para desbloquear la siguiente. ¡Como un Escape Room! 🔓", "🎯")
+# Willkommens-Nachricht
+show_mascot("🎮 Willkommen bei deinem Python-Abenteuer! Löse jede Lektion um die nächste freizuschalten. Wie ein Escape Room! 🔓", "🎯")
     </script>
 </body>
 </html>
