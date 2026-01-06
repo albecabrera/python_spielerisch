@@ -930,7 +930,7 @@ def load_lesson(lesson_id):
 
     # Setze Cursor nach "# Dein Code:"
     def position_cursor():
-        text = editor.textContent
+        text = editor.innerText if hasattr(editor, 'innerText') else editor.textContent
         # Finde Position nach "# Dein Code:"
         if "# Dein Code:" in text:
             pos = text.index("# Dein Code:") + len("# Dein Code:")
@@ -1034,8 +1034,8 @@ def highlight_comments():
     # Speichere Cursor-Position
     cursor_pos = get_cursor_position(editor)
 
-    # Hole den Text
-    text = editor.textContent
+    # Hole den Text - verwende innerText statt textContent für bessere Newline-Behandlung
+    text = editor.innerText if hasattr(editor, 'innerText') else editor.textContent
 
     # Prüfe auf Syntaxfehler
     error_lines = check_syntax_errors(text)
@@ -1045,39 +1045,41 @@ def highlight_comments():
     highlighted_lines = []
 
     for line_num, line in enumerate(lines):
-        # Escape HTML
-        escaped_line = escape(line)
+        # Escape HTML - aber behalte Leerzeichen
+        escaped_line = escape(line) if line else '&nbsp;'
 
         # Prüfe ob Zeile einen Fehler hat
         has_error = line_num in error_lines and line.strip() and not line.strip().startswith('#')
 
         if line.strip().startswith('#'):
             # Ganze Zeile ist Kommentar
-            highlighted_lines.append(f'<span class="code-comment">{escaped_line}</span>')
+            highlighted_lines.append(f'<div class="code-comment">{escaped_line}</div>')
         elif has_error:
             # Fehlerhafte Zeile
-            highlighted_lines.append(f'<span class="code-error">{escaped_line}</span>')
+            highlighted_lines.append(f'<div class="code-error">{escaped_line}</div>')
         else:
             # Normaler Code oder gemischte Zeile
             if '#' in line:
                 # Suche nach Kommentar in der Zeile
                 parts = escaped_line.split('#', 1)
-                highlighted_lines.append(f'<span class="code-normal">{parts[0]}</span><span class="code-comment">#{parts[1]}</span>')
+                highlighted_lines.append(f'<div><span class="code-normal">{parts[0]}</span><span class="code-comment">#{parts[1]}</span></div>')
             elif line.strip():
                 # Nicht-leere Zeile ist Code
-                highlighted_lines.append(f'<span class="code-normal">{escaped_line}</span>')
+                highlighted_lines.append(f'<div class="code-normal">{escaped_line}</div>')
             else:
                 # Leere Zeile
-                highlighted_lines.append(escaped_line)
+                highlighted_lines.append(f'<div>{escaped_line}</div>')
 
-    # Setze HTML
-    editor.innerHTML = '<br>'.join(highlighted_lines) if highlighted_lines else '<br>'
+    # Setze HTML - verwende div statt br für bessere Zeilenumbrüche
+    editor.innerHTML = ''.join(highlighted_lines) if highlighted_lines else '<div><br></div>'
 
     # Stelle Cursor-Position wieder her
     set_cursor_position(editor, cursor_pos)
 
 def run_code():
-    code = document['codeEditor'].textContent
+    # Verwende innerText für bessere Zeilenumbruch-Behandlung
+    editor = document['codeEditor']
+    code = editor.innerText if hasattr(editor, 'innerText') else editor.textContent
     output_div = document['output']
 
     old_stdout = sys.stdout
@@ -1101,7 +1103,9 @@ def run_code():
 def check_solution():
     import random
     lesson = LESSONS[current_lesson]
-    code = document['codeEditor'].textContent
+    # Verwende innerText für bessere Zeilenumbruch-Behandlung
+    editor = document['codeEditor']
+    code = editor.innerText if hasattr(editor, 'innerText') else editor.textContent
 
     # Führe Code aus für Output
     old_stdout = sys.stdout
@@ -1174,12 +1178,12 @@ def check_solution():
 def reset_code():
     lesson = LESSONS[current_lesson]
     editor = document['codeEditor']
-    editor.textContent = lesson['starter']
+    editor.innerText = lesson['starter']
     highlight_comments()
 
     # Setze Cursor nach "# Dein Code:"
     def position_cursor():
-        text = editor.textContent
+        text = editor.innerText if hasattr(editor, 'innerText') else editor.textContent
         if "# Dein Code:" in text:
             pos = text.index("# Dein Code:") + len("# Dein Code:")
             if pos < len(text):
