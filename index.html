@@ -990,35 +990,48 @@ def load_lesson(lesson_id):
 def handle_editor_keydown(event):
     """Erweiterte Keyboard-Shortcuts für den Editor"""
 
+    # Enter: Neue Zeile einfügen
+    if event.key == 'Enter':
+        event.preventDefault()
+        # Füge Zeilenumbruch ein
+        document.execCommand('insertText', False, '\n')
+        return
+
     # Tab: 4 Leerzeichen einfügen
     if event.key == 'Tab':
         event.preventDefault()
         document.execCommand('insertText', False, '    ')
+        return
 
     # Option+L: Zeilennummern einblenden
-    elif event.altKey and event.key == 'l':
+    if event.altKey and event.key == 'l':
         event.preventDefault()
         toggle_line_numbers(True)
+        return
 
     # Option+P: Zeilennummern ausblenden
-    elif event.altKey and event.key == 'p':
+    if event.altKey and event.key == 'p':
         event.preventDefault()
         toggle_line_numbers(False)
+        return
 
     # Shift+Option+Down: Zeile duplizieren
-    elif event.shiftKey and event.altKey and event.key == 'ArrowDown':
+    if event.shiftKey and event.altKey and event.key == 'ArrowDown':
         event.preventDefault()
         duplicate_line()
+        return
 
     # Option+Up: Zeile nach oben verschieben
-    elif event.altKey and event.key == 'ArrowUp':
+    if event.altKey and event.key == 'ArrowUp':
         event.preventDefault()
         move_line_up()
+        return
 
     # Option+Down: Zeile nach unten verschieben
-    elif event.altKey and event.key == 'ArrowDown':
+    if event.altKey and event.key == 'ArrowDown':
         event.preventDefault()
         move_line_down()
+        return
 
 def get_cursor_position(editor):
     """Holt die Cursor-Position als Offset"""
@@ -1254,6 +1267,11 @@ def run_code():
             output_div.classList.remove('output-error')
         else:
             output_div.html = 'Keine Ausgabe'
+    except IndentationError as e:
+        # Freundliche Nachricht für Indentation-Fehler
+        error_msg = f"💡 Tipp: Achte auf die Einrückung (Indentation). Python nutzt 4 Leerzeichen für Code-Blöcke."
+        output_div.html = error_msg
+        output_div.classList.add('output-error')
     except Exception as e:
         error_msg = f"❌ Fehler: {str(e)}"
         output_div.html = error_msg
@@ -1277,6 +1295,10 @@ def check_solution():
     try:
         exec(code)
         output = sys.stdout.getvalue()
+    except IndentationError:
+        # Indentation-Fehler ignorieren für die Lösung-Prüfung
+        # (Nutzer kann trotzdem seine Lösung einreichen)
+        output = ""
     except:
         output = ""
     finally:
