@@ -222,6 +222,43 @@
             font-family: 'Consolas', monospace;
             font-size: 14px;
             resize: vertical;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .code-editor-container {
+            position: relative;
+        }
+
+        .code-highlight {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            min-height: 200px;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            pointer-events: none;
+            color: transparent;
+        }
+
+        .code-editor:focus {
+            outline: 2px solid #00a2ff;
+        }
+
+        .code-comment {
+            color: #6adb8c !important;
+            font-weight: 600;
         }
         
         .editor-buttons {
@@ -500,9 +537,12 @@ LESSONS = {
         'reward': 100,
         'task': 'Schreibe 3 verschiedene print()-Befehle.',
         'hint': 'Mit print() kannst du Text ausgeben. Beispiel: print("Hallo")\nSchreibe 3 verschiedene print()-Zeilen mit unterschiedlichen Texten.',
-        'starter': '''print("Hallo Welt!")
-print("Ich lerne Python!")
-print("Das macht Spaß!")''',
+        'starter': '''# AUFGABE: Schreibe 3 verschiedene print()-Befehle
+# Mit print() kannst du Text auf dem Bildschirm ausgeben
+# Beispiel: print("Dein Text hier")
+
+# Dein Code:
+''',
         'check': lambda code, output: code.count("print(") >= 3
     },
     'lesson2': {
@@ -511,11 +551,13 @@ print("Das macht Spaß!")''',
         'reward': 150,
         'task': 'Erstelle 3 Variablen und gib sie aus.',
         'hint': 'Variablen speichern Werte. Beispiel: name = "Max"\nErstelle 3 Variablen (Text und Zahlen) und gib sie mit print() aus.',
-        'starter': '''name = "Max"
-alter = 14
+        'starter': '''# AUFGABE: Erstelle 3 Variablen und gib sie aus
+# Variablen speichern Werte
+# Text-Variable: name = "Max"
+# Zahlen-Variable: alter = 15
 
-print("Name:", name)
-print("Alter:", alter)''',
+# Dein Code:
+''',
         'check': lambda code, output: code.count("=") >= 3 and code.count("print(") >= 3
     },
     'lesson3': {
@@ -524,10 +566,12 @@ print("Alter:", alter)''',
         'reward': 150,
         'task': 'Benutze Python als Taschenrechner.',
         'hint': 'Operatoren: + (plus), - (minus), * (mal), / (geteilt)\nBeispiel: summe = 10 + 5\nErstelle Variablen und berechne damit.',
-        'starter': '''a = 10
-b = 5
-summe = a + b
-print("Summe:", summe)''',
+        'starter': '''# AUFGABE: Benutze Python als Taschenrechner
+# Operatoren: + (plus), - (minus), * (mal), / (geteilt)
+# Beispiel: summe = 10 + 5
+
+# Dein Code:
+''',
         'check': lambda code, output: "+" in code or "*" in code
     },
     'lesson4': {
@@ -536,9 +580,12 @@ print("Summe:", summe)''',
         'reward': 200,
         'task': 'Kombiniere Text und Variablen mit f-Strings.',
         'hint': 'f-String Format: f"Text {variable} mehr Text"\nBeispiel: print(f"Hallo {name}")\nSchreibe einen Satz über dich.',
-        'starter': '''name = "Alex"
-alter = 15
-print(f"Ich bin {name} und {alter} Jahre alt")''',
+        'starter': '''# AUFGABE: Kombiniere Text und Variablen mit f-Strings
+# f-String Format: f"Text {variable} mehr Text"
+# Beispiel: print(f"Ich bin {name}")
+
+# Dein Code:
+''',
         'check': lambda code, output: "f\"" in code or "f'" in code
     },
     'lesson5': {
@@ -547,9 +594,12 @@ print(f"Ich bin {name} und {alter} Jahre alt")''',
         'reward': 200,
         'task': 'Arbeite mit Listen und füge Elemente hinzu.',
         'hint': 'Liste erstellen: meine_liste = ["Element1", "Element2"]\nElement hinzufügen: meine_liste.append("Neues")\nNutze .append() um Elemente hinzuzufügen.',
-        'starter': '''fruechte = ["Apfel", "Banane"]
-fruechte.append("Orange")
-print(fruechte)''',
+        'starter': '''# AUFGABE: Arbeite mit Listen und füge Elemente hinzu
+# Liste erstellen: fruechte = ["Apfel", "Banane"]
+# Element hinzufügen: fruechte.append("Orange")
+
+# Dein Code:
+''',
         'check': lambda code, output: "append(" in code
     },
     'lesson6': {
@@ -558,11 +608,13 @@ print(fruechte)''',
         'reward': 250,
         'task': 'Triff Entscheidungen mit if/else.',
         'hint': 'Vergleiche: == (gleich), > (größer), < (kleiner), >= (größer gleich)\nBeispiel: if alter >= 18:\nSchreibe eine if/else Bedingung.',
-        'starter': '''alter = 15
-if alter >= 18:
-    print("Erwachsen")
-else:
-    print("Jugendlich")''',
+        'starter': '''# AUFGABE: Triff Entscheidungen mit if/else
+# Vergleiche: == (gleich), > (größer), < (kleiner)
+# Beispiel: if alter >= 18:
+#     print("Erwachsen")
+
+# Dein Code:
+''',
         'check': lambda code, output: "if" in code and "else" in code
     },
     'lesson7': {
@@ -571,8 +623,12 @@ else:
         'reward': 300,
         'task': 'Wiederhole Aktionen mit einer for-Schleife.',
         'hint': 'for-Schleife: for variable in range(start, ende):\nBeispiel: for i in range(1, 6):\nrange(1, 6) erzeugt die Zahlen 1, 2, 3, 4, 5',
-        'starter': '''for i in range(1, 6):
-    print(f"Zahl: {i}")''',
+        'starter': '''# AUFGABE: Wiederhole Aktionen mit einer for-Schleife
+# for-Schleife: for i in range(1, 6):
+# range(1, 6) erzeugt: 1, 2, 3, 4, 5
+
+# Dein Code:
+''',
         'check': lambda code, output: "for" in code and "range(" in code
     },
     'lesson8': {
@@ -581,10 +637,13 @@ else:
         'reward': 300,
         'task': 'Erstelle eigene Funktionen.',
         'hint': 'Syntax: def funktionsname(parameter):\nAufruf: funktionsname("Wert")\nFunktionen können mehrmals aufgerufen werden.',
-        'starter': '''def gruesse(name):
-    print(f"Hallo {name}!")
+        'starter': '''# AUFGABE: Erstelle eigene Funktionen
+# Syntax: def funktionsname(parameter):
+#     print("Etwas")
+# Aufruf: funktionsname("Wert")
 
-gruesse("Max")''',
+# Dein Code:
+''',
         'check': lambda code, output: "def " in code and "return" in code or "def " in code
     },
     'lesson9': {
@@ -593,9 +652,12 @@ gruesse("Max")''',
         'reward': 250,
         'task': 'Benutze das random-Modul.',
         'hint': 'Module importieren: import random\nZufallszahl: random.randint(start, ende)\nBeispiel: random.randint(1, 10)',
-        'starter': '''import random
-zahl = random.randint(1, 10)
-print("Zufallszahl:", zahl)''',
+        'starter': '''# AUFGABE: Benutze das random-Modul
+# Module importieren: import random
+# Zufallszahl erzeugen: random.randint(1, 10)
+
+# Dein Code:
+''',
         'check': lambda code, output: "import" in code
     },
     'lesson10': {
@@ -604,15 +666,15 @@ print("Zufallszahl:", zahl)''',
         'reward': 400,
         'task': 'Erstelle eine Klasse mit Eigenschaften und Methoden.',
         'hint': 'class Klassenname:\n    def __init__(self, parameter):\n        self.eigenschaft = parameter\n    def methode(self):\n        print("Etwas")\nObjekt erstellen: obj = Klassenname("Wert")',
-        'starter': '''class Hund:
-    def __init__(self, name):
-        self.name = name
+        'starter': '''# AUFGABE: Erstelle eine Klasse mit Eigenschaften und Methoden
+# class Hund:
+#     def __init__(self, name):
+#         self.name = name
+#     def bellen(self):
+#         print(f"{self.name} bellt!")
 
-    def bellen(self):
-        print(f"{self.name} bellt!")
-
-mein_hund = Hund("Rex")
-mein_hund.bellen()''',
+# Dein Code:
+''',
         'check': lambda code, output: "class " in code and "__init__" in code
     },
     'lesson11': {
@@ -621,10 +683,13 @@ mein_hund.bellen()''',
         'reward': 350,
         'task': 'Simuliere das Arbeiten mit Dateien.',
         'hint': 'In normalem Python: with open("datei.txt", "w") as f:\nHier in Brython: Simuliere was gespeichert würde.\nZeige mit print() was in einer Datei stehen würde.',
-        'starter': '''dateiname = "meine_notizen.txt"
-inhalt = "Das ist mein Text"
+        'starter': '''# AUFGABE: Simuliere das Arbeiten mit Dateien
+# In Brython können wir keine echten Dateien schreiben
+# Zeige mit print() was du speichern würdest
+# Beispiel: print(f"Würde '{text}' speichern")
 
-print(f"Würde '{inhalt}' in {dateiname} speichern")''',
+# Dein Code:
+''',
         'check': lambda code, output: len(code) > 10
     },
     'lesson12': {
@@ -633,11 +698,15 @@ print(f"Würde '{inhalt}' in {dateiname} speichern")''',
         'reward': 500,
         'task': 'Baue ein Spiel mit allem was du gelernt hast!',
         'hint': 'Kombiniere: random, Variablen, if/else, Schleifen, Funktionen\nBeispiel-Spiel: Zahlenraten\nErstelle eine Zufallszahl und vergleiche sie mit einer Eingabe.',
-        'starter': '''import random
+        'starter': '''# AUFGABE: Baue dein eigenes Spiel!
+# Kombiniere alles was du gelernt hast
+# Beispiel: Zahlenraten-Spiel
+# - Erstelle eine Zufallszahl
+# - Vergleiche mit einer Zahl
+# - Zeige das Ergebnis
 
-zahl = random.randint(1, 10)
-print(f"Rate die Zahl zwischen 1-10!")
-print(f"Die Zahl war: {zahl}")''',
+# Dein Code:
+''',
         'check': lambda code, output: "import random" in code
     },
 
@@ -797,7 +866,7 @@ def load_lesson(lesson_id):
             </div>
 
             <h3 style="color: #00a2ff; margin: 20px 0 10px 0;">💻 Code-Editor:</h3>
-            <textarea class="code-editor" id="codeEditor">{lesson['starter']}</textarea>
+            <div class="code-editor" id="codeEditor" contenteditable="true" spellcheck="false">{lesson['starter']}</div>
 
             <div class="editor-buttons">
                 <button class="editor-btn" onclick="runCode()">▶️ Ausführen (F5)</button>
@@ -814,7 +883,15 @@ def load_lesson(lesson_id):
     '''
     
     document['contentArea'].html = content
-    
+
+    # Syntax-Highlighting für Kommentare
+    highlight_comments()
+
+    # Event Listener für Eingabe
+    editor = document['codeEditor']
+    editor.bind('input', lambda e: highlight_comments())
+    editor.bind('keydown', handle_editor_keydown)
+
     # Aktive Lektion markieren
     for item in document.select('.lesson-item'):
         item.classList.remove('active')
@@ -823,13 +900,51 @@ def load_lesson(lesson_id):
     except:
         pass
 
+def handle_editor_keydown(event):
+    """Verhindert Standard-Tab-Verhalten und fügt 4 Leerzeichen ein"""
+    if event.key == 'Tab':
+        event.preventDefault()
+        # Füge 4 Leerzeichen ein
+        document.execCommand('insertText', False, '    ')
+
+def highlight_comments():
+    """Färbt Kommentare im Code-Editor grün"""
+    from html import escape
+    editor = document['codeEditor']
+
+    # Hole den Text
+    text = editor.textContent
+
+    # Färbe Kommentare
+    lines = text.split('\n')
+    highlighted_lines = []
+
+    for line in lines:
+        # Escape HTML
+        escaped_line = escape(line)
+
+        if line.strip().startswith('#'):
+            # Ganze Zeile ist Kommentar
+            highlighted_lines.append(f'<span class="code-comment">{escaped_line}</span>')
+        else:
+            # Suche nach Kommentar in der Zeile (aber nicht in Strings)
+            if '#' in line:
+                # Einfache Erkennung: Kommentar nach # (nicht perfekt, aber ausreichend)
+                parts = escaped_line.split('#', 1)
+                highlighted_lines.append(parts[0] + '<span class="code-comment">#' + parts[1] + '</span>')
+            else:
+                highlighted_lines.append(escaped_line)
+
+    # Setze HTML
+    editor.innerHTML = '<br>'.join(highlighted_lines) if highlighted_lines else '<br>'
+
 def run_code():
-    code = document['codeEditor'].value
+    code = document['codeEditor'].textContent
     output_div = document['output']
-    
+
     old_stdout = sys.stdout
     sys.stdout = StringIO()
-    
+
     try:
         exec(code)
         output = sys.stdout.getvalue()
@@ -848,7 +963,7 @@ def run_code():
 def check_solution():
     import random
     lesson = LESSONS[current_lesson]
-    code = document['codeEditor'].value
+    code = document['codeEditor'].textContent
 
     # Führe Code aus für Output
     old_stdout = sys.stdout
@@ -920,7 +1035,8 @@ def check_solution():
 
 def reset_code():
     lesson = LESSONS[current_lesson]
-    document['codeEditor'].value = lesson['starter']
+    document['codeEditor'].textContent = lesson['starter']
+    highlight_comments()
     document['output'].html = 'Keine Ausgabe'
     document['feedback'].style.display = 'none'
 
