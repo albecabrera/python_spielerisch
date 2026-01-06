@@ -230,26 +230,35 @@
 
         .code-editor-container {
             position: relative;
+            display: flex;
         }
 
-        .code-highlight {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            min-height: 200px;
-            background: transparent;
-            border: 1px solid transparent;
-            border-radius: 8px;
-            padding: 15px;
+        .line-numbers {
+            display: none;
+            background: #1a1c20;
+            color: #6b7280;
+            padding: 15px 10px;
             font-family: 'Consolas', monospace;
             font-size: 14px;
             line-height: 1.6;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            pointer-events: none;
-            color: transparent;
+            text-align: right;
+            user-select: none;
+            border-right: 1px solid #3a3c42;
+            border-radius: 8px 0 0 8px;
+            min-width: 40px;
+        }
+
+        .line-numbers.visible {
+            display: block;
+        }
+
+        .code-editor-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .code-editor-container.with-line-numbers .code-editor {
+            border-radius: 0 8px 8px 0;
         }
 
         .code-editor:focus {
@@ -902,7 +911,12 @@ def load_lesson(lesson_id):
             </div>
 
             <h3 style="color: #00a2ff; margin: 20px 0 10px 0;">💻 Code-Editor:</h3>
-            <div class="code-editor" id="codeEditor" contenteditable="true" spellcheck="false">{lesson['starter']}</div>
+            <div class="code-editor-container" id="editorContainer">
+                <div class="line-numbers" id="lineNumbers"></div>
+                <div class="code-editor-wrapper">
+                    <div class="code-editor" id="codeEditor" contenteditable="true" spellcheck="false">{lesson['starter']}</div>
+                </div>
+            </div>
 
             <div class="editor-buttons">
                 <button class="editor-btn" onclick="runCode()">▶️ Ausführen (F5)</button>
@@ -959,11 +973,37 @@ def load_lesson(lesson_id):
         pass
 
 def handle_editor_keydown(event):
-    """Verhindert Standard-Tab-Verhalten und fügt 4 Leerzeichen ein"""
+    """Erweiterte Keyboard-Shortcuts für den Editor"""
+
+    # Tab: 4 Leerzeichen einfügen
     if event.key == 'Tab':
         event.preventDefault()
-        # Füge 4 Leerzeichen ein
         document.execCommand('insertText', False, '    ')
+
+    # Option+L: Zeilennummern einblenden
+    elif event.altKey and event.key == 'l':
+        event.preventDefault()
+        toggle_line_numbers(True)
+
+    # Option+P: Zeilennummern ausblenden
+    elif event.altKey and event.key == 'p':
+        event.preventDefault()
+        toggle_line_numbers(False)
+
+    # Shift+Option+Down: Zeile duplizieren
+    elif event.shiftKey and event.altKey and event.key == 'ArrowDown':
+        event.preventDefault()
+        duplicate_line()
+
+    # Option+Up: Zeile nach oben verschieben
+    elif event.altKey and event.key == 'ArrowUp':
+        event.preventDefault()
+        move_line_up()
+
+    # Option+Down: Zeile nach unten verschieben
+    elif event.altKey and event.key == 'ArrowDown':
+        event.preventDefault()
+        move_line_down()
 
 def get_cursor_position(editor):
     """Holt die Cursor-Position als Offset"""
@@ -1048,6 +1088,124 @@ def highlight_comments():
 
     # Stelle Cursor-Position wieder her
     set_cursor_position(editor, cursor_pos)
+
+    # Update Zeilennummern
+    update_line_numbers()
+
+def update_line_numbers():
+    """Aktualisiert die Zeilennummern basierend auf der Anzahl der Zeilen"""
+    line_numbers_div = document['lineNumbers']
+    if not line_numbers_div.classList.contains('visible'):
+        return
+
+    editor = document['codeEditor']
+    text = editor.innerText if hasattr(editor, 'innerText') else editor.textContent
+    lines = text.split('\n')
+    line_count = len(lines)
+
+    # Erstelle Zeilennummern
+    numbers_html = '<br>'.join([str(i + 1) for i in range(line_count)])
+    line_numbers_div.innerHTML = numbers_html
+
+def toggle_line_numbers(show):
+    """Zeigt oder versteckt Zeilennummern"""
+    line_numbers_div = document['lineNumbers']
+    editor_container = document['editorContainer']
+
+    if show:
+        line_numbers_div.classList.add('visible')
+        editor_container.classList.add('with-line-numbers')
+        update_line_numbers()
+    else:
+        line_numbers_div.classList.remove('visible')
+        editor_container.classList.remove('with-line-numbers')
+
+def get_current_line_info():
+    """Holt Informationen über die aktuelle Zeile"""
+    editor = document['codeEditor']
+    text = editor.innerText if hasattr(editor, 'innerText') else editor.textContent
+    lines = text.split('\n')
+    cursor_pos = get_cursor_position(editor)
+
+    # Finde die aktuelle Zeile
+    current_pos = 0
+    current_line_num = 0
+    for i, line in enumerate(lines):
+        line_length = len(line) + 1  # +1 für newline
+        if current_pos + line_length > cursor_pos:
+            current_line_num = i
+            break
+        current_pos += line_length
+
+    return {
+        'lines': lines,
+        'current_line_num': current_line_num,
+        'cursor_pos': cursor_pos,
+        'text': text
+    }
+
+def duplicate_line():
+    """Dupliziert die aktuelle Zeile nach unten"""
+    editor = document['codeEditor']
+    info = get_current_line_info()
+    lines = info['lines']
+    current_line_num = info['current_line_num']
+
+    # Dupliziere die aktuelle Zeile
+    if current_line_num < len(lines):
+        current_line = lines[current_line_num]
+        lines.insert(current_line_num + 1, current_line)
+
+        # Setze neuen Text
+        new_text = '\n'.join(lines)
+        editor.innerText = new_text
+        highlight_comments()
+
+        # Setze Cursor auf die duplizierte Zeile
+        new_cursor_pos = sum(len(lines[i]) + 1 for i in range(current_line_num + 1))
+        window.setTimeout(lambda: set_cursor_position(editor, new_cursor_pos), 10)
+
+def move_line_up():
+    """Verschiebt die aktuelle Zeile nach oben"""
+    editor = document['codeEditor']
+    info = get_current_line_info()
+    lines = info['lines']
+    current_line_num = info['current_line_num']
+
+    # Prüfe ob wir nach oben verschieben können
+    if current_line_num > 0:
+        # Tausche Zeilen
+        lines[current_line_num], lines[current_line_num - 1] = lines[current_line_num - 1], lines[current_line_num]
+
+        # Setze neuen Text
+        new_text = '\n'.join(lines)
+        editor.innerText = new_text
+        highlight_comments()
+
+        # Setze Cursor auf die verschobene Zeile
+        new_cursor_pos = sum(len(lines[i]) + 1 for i in range(current_line_num - 1))
+        window.setTimeout(lambda: set_cursor_position(editor, new_cursor_pos), 10)
+
+def move_line_down():
+    """Verschiebt die aktuelle Zeile nach unten"""
+    editor = document['codeEditor']
+    info = get_current_line_info()
+    lines = info['lines']
+    current_line_num = info['current_line_num']
+
+    # Prüfe ob wir nach unten verschieben können
+    if current_line_num < len(lines) - 1:
+        # Tausche Zeilen
+        lines[current_line_num], lines[current_line_num + 1] = lines[current_line_num + 1], lines[current_line_num]
+
+        # Setze neuen Text
+        new_text = '\n'.join(lines)
+        editor.innerText = new_text
+        highlight_comments()
+
+        # Setze Cursor auf die verschobene Zeile
+        new_cursor_pos = sum(len(lines[i]) + 1 for i in range(current_line_num + 1))
+        window.setTimeout(lambda: set_cursor_position(editor, new_cursor_pos), 10)
 
 def run_code():
     # Verwende innerText für bessere Zeilenumbruch-Behandlung
@@ -1227,6 +1385,10 @@ window.checkSolution = check_solution
 window.resetCode = reset_code
 window.hideMascot = hide_mascot
 window.toggleHint = toggle_hint
+window.toggleLineNumbers = toggle_line_numbers
+window.duplicateLine = duplicate_line
+window.moveLineUp = move_line_up
+window.moveLineDown = move_line_down
 
 # Initialisiere
 init()
