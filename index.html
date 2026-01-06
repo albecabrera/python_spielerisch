@@ -234,7 +234,7 @@
         }
 
         .line-numbers {
-            display: none;
+            display: block;
             background: #1a1c20;
             color: #6b7280;
             padding: 15px 10px;
@@ -248,8 +248,8 @@
             min-width: 40px;
         }
 
-        .line-numbers.visible {
-            display: block;
+        .line-numbers.hidden {
+            display: none;
         }
 
         .code-editor-wrapper {
@@ -257,12 +257,25 @@
             position: relative;
         }
 
-        .code-editor-container.with-line-numbers .code-editor {
+        .code-editor-container .code-editor {
             border-radius: 0 8px 8px 0;
         }
 
         .code-editor:focus {
             outline: 2px solid #00a2ff;
+        }
+
+        .code-editor div {
+            position: relative;
+        }
+
+        .current-line-highlight {
+            background: rgba(0, 162, 255, 0.1) !important;
+            border-left: 2px solid #00a2ff;
+            padding-left: 13px !important;
+            margin-left: -15px;
+            padding-right: 15px;
+            margin-right: -15px;
         }
 
         .code-comment {
@@ -937,10 +950,12 @@ def load_lesson(lesson_id):
     # Syntax-Highlighting für Kommentare
     highlight_comments()
 
-    # Event Listener für Eingabe
+    # Event Listener für Eingabe und Cursor-Bewegung
     editor = document['codeEditor']
     editor.bind('input', lambda e: highlight_comments())
     editor.bind('keydown', handle_editor_keydown)
+    editor.bind('keyup', lambda e: highlight_comments())
+    editor.bind('click', lambda e: highlight_comments())
 
     # Setze Cursor nach "# Dein Code:"
     def position_cursor():
@@ -1049,7 +1064,7 @@ def set_cursor_position(editor, offset):
         pass
 
 def highlight_comments():
-    """Färbt Kommentare grün und Code cyan - ohne Fehlermarkierung"""
+    """Färbt Kommentare grün und Code cyan - mit aktueller Zeilen-Hervorhebung"""
     from html import escape
     editor = document['codeEditor']
 
@@ -1059,29 +1074,43 @@ def highlight_comments():
     # Hole den Text - verwende innerText statt textContent für bessere Newline-Behandlung
     text = editor.innerText if hasattr(editor, 'innerText') else editor.textContent
 
-    # Färbe Kommentare und Code
+    # Finde aktuelle Zeile
     lines = text.split('\n')
+    current_pos = 0
+    current_line_num = 0
+    for i, line in enumerate(lines):
+        line_length = len(line) + 1  # +1 für newline
+        if current_pos + line_length > cursor_pos:
+            current_line_num = i
+            break
+        current_pos += line_length
+
+    # Färbe Kommentare und Code
     highlighted_lines = []
 
     for line_num, line in enumerate(lines):
         # Escape HTML
         escaped_line = escape(line)
 
+        # Prüfe ob dies die aktuelle Zeile ist
+        is_current_line = (line_num == current_line_num)
+        line_class = 'current-line-highlight' if is_current_line else ''
+
         if line.strip().startswith('#'):
             # Ganze Zeile ist Kommentar
-            highlighted_lines.append(f'<div class="code-comment">{escaped_line if escaped_line else " "}</div>')
+            highlighted_lines.append(f'<div class="code-comment {line_class}">{escaped_line if escaped_line else " "}</div>')
         else:
             # Normaler Code oder gemischte Zeile
             if '#' in line:
                 # Suche nach Kommentar in der Zeile
                 parts = escaped_line.split('#', 1)
-                highlighted_lines.append(f'<div><span class="code-normal">{parts[0]}</span><span class="code-comment">#{parts[1]}</span></div>')
+                highlighted_lines.append(f'<div class="{line_class}"><span class="code-normal">{parts[0]}</span><span class="code-comment">#{parts[1]}</span></div>')
             elif line.strip():
                 # Nicht-leere Zeile ist Code
-                highlighted_lines.append(f'<div class="code-normal">{escaped_line}</div>')
+                highlighted_lines.append(f'<div class="code-normal {line_class}">{escaped_line}</div>')
             else:
                 # Leere Zeile - normales Leerzeichen
-                highlighted_lines.append(f'<div> </div>')
+                highlighted_lines.append(f'<div class="{line_class}"> </div>')
 
     # Setze HTML - verwende div für bessere Zeilenumbrüche
     editor.innerHTML = ''.join(highlighted_lines) if highlighted_lines else '<div><br></div>'
@@ -1095,7 +1124,7 @@ def highlight_comments():
 def update_line_numbers():
     """Aktualisiert die Zeilennummern basierend auf der Anzahl der Zeilen"""
     line_numbers_div = document['lineNumbers']
-    if not line_numbers_div.classList.contains('visible'):
+    if line_numbers_div.classList.contains('hidden'):
         return
 
     editor = document['codeEditor']
@@ -1110,15 +1139,12 @@ def update_line_numbers():
 def toggle_line_numbers(show):
     """Zeigt oder versteckt Zeilennummern"""
     line_numbers_div = document['lineNumbers']
-    editor_container = document['editorContainer']
 
     if show:
-        line_numbers_div.classList.add('visible')
-        editor_container.classList.add('with-line-numbers')
+        line_numbers_div.classList.remove('hidden')
         update_line_numbers()
     else:
-        line_numbers_div.classList.remove('visible')
-        editor_container.classList.remove('with-line-numbers')
+        line_numbers_div.classList.add('hidden')
 
 def get_current_line_info():
     """Holt Informationen über die aktuelle Zeile"""
