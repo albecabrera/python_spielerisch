@@ -1015,6 +1015,9 @@ def check_syntax_errors(code):
 
     error_lines = set()
 
+    # Entferne Non-Breaking Spaces (U+00A0) vor der Syntax-Prüfung
+    code = code.replace('\u00a0', ' ')
+
     # Versuche den Code zu kompilieren
     try:
         compile(code, '<string>', 'exec')
@@ -1045,18 +1048,18 @@ def highlight_comments():
     highlighted_lines = []
 
     for line_num, line in enumerate(lines):
-        # Escape HTML - aber behalte Leerzeichen
-        escaped_line = escape(line) if line else '&nbsp;'
+        # Escape HTML
+        escaped_line = escape(line)
 
         # Prüfe ob Zeile einen Fehler hat
         has_error = line_num in error_lines and line.strip() and not line.strip().startswith('#')
 
         if line.strip().startswith('#'):
             # Ganze Zeile ist Kommentar
-            highlighted_lines.append(f'<div class="code-comment">{escaped_line}</div>')
+            highlighted_lines.append(f'<div class="code-comment">{escaped_line if escaped_line else " "}</div>')
         elif has_error:
             # Fehlerhafte Zeile
-            highlighted_lines.append(f'<div class="code-error">{escaped_line}</div>')
+            highlighted_lines.append(f'<div class="code-error">{escaped_line if escaped_line else " "}</div>')
         else:
             # Normaler Code oder gemischte Zeile
             if '#' in line:
@@ -1067,8 +1070,8 @@ def highlight_comments():
                 # Nicht-leere Zeile ist Code
                 highlighted_lines.append(f'<div class="code-normal">{escaped_line}</div>')
             else:
-                # Leere Zeile
-                highlighted_lines.append(f'<div>{escaped_line}</div>')
+                # Leere Zeile - normales Leerzeichen statt &nbsp;
+                highlighted_lines.append(f'<div> </div>')
 
     # Setze HTML - verwende div statt br für bessere Zeilenumbrüche
     editor.innerHTML = ''.join(highlighted_lines) if highlighted_lines else '<div><br></div>'
@@ -1080,6 +1083,10 @@ def run_code():
     # Verwende innerText für bessere Zeilenumbruch-Behandlung
     editor = document['codeEditor']
     code = editor.innerText if hasattr(editor, 'innerText') else editor.textContent
+
+    # Entferne Non-Breaking Spaces (U+00A0) und ersetze sie mit normalen Leerzeichen
+    code = code.replace('\u00a0', ' ')
+
     output_div = document['output']
 
     old_stdout = sys.stdout
@@ -1106,6 +1113,9 @@ def check_solution():
     # Verwende innerText für bessere Zeilenumbruch-Behandlung
     editor = document['codeEditor']
     code = editor.innerText if hasattr(editor, 'innerText') else editor.textContent
+
+    # Entferne Non-Breaking Spaces (U+00A0) und ersetze sie mit normalen Leerzeichen
+    code = code.replace('\u00a0', ' ')
 
     # Führe Code aus für Output
     old_stdout = sys.stdout
