@@ -214,6 +214,7 @@
         .code-editor {
             width: 100%;
             min-height: 200px;
+            max-height: 600px;
             background: #111217;
             color: #e5e7eb;
             border: 1px solid #3a3c42;
@@ -226,6 +227,7 @@
             white-space: pre-wrap;
             word-wrap: break-word;
             overflow-wrap: break-word;
+            overflow-y: auto;
         }
 
         .code-editor-container {
@@ -541,6 +543,18 @@ import sys
 from io import StringIO
 import traceback
 
+# Brython-kompatible input()-Funktion
+def input(prompt_text=""):
+    """Simuliert input() mit window.prompt()"""
+    result = window.prompt(prompt_text)
+    if result is None:
+        raise KeyboardInterrupt("Input cancelled")
+    return result
+
+# Mache input() global verfügbar
+import builtins
+builtins.input = input
+
 # Spieler-Daten
 player_data = {
     'robux': 0,
@@ -596,47 +610,51 @@ LESSONS = {
         'title': 'Variablen & Datentypen',
         'world': 1,
         'reward': 150,
-        'task': 'Erstelle 3 Variablen und gib sie aus.',
-        'hint': 'Variablen speichern Werte. Beispiel: name = "Max"\nErstelle 3 Variablen (Text und Zahlen) und gib sie mit print() aus.',
-        'starter': '''# AUFGABE: Erstelle 3 Variablen und gib sie aus
-# Variablen speichern Werte
-# Text-Variable: name = "Max"
-# Zahlen-Variable: alter = 15
+        'task': 'Erstelle ein Programm, das nach Vor- und Nachnamen fragt und diese ausgibt. Zeige dann das Alter an und berechne, wie viele Jahre bis 100.',
+        'hint': 'Nutze input() für Benutzereingaben und print() für Ausgaben.\nVariablen speichern Werte: name = "Max"\nRechne mit Zahlen: differenz = 100 - alter',
+        'starter': '''# Erwartete Ausgabe:
+# Wie lautet dein Vorname:? Max
+# Wie lautet dein Nachname:? Mustermann
+# Hallo Max Mustermann
+# Wie alt bist du? 30
+# Wow, noch 70 Jahre, dann bist du 100!
 
 # Dein Code:
 
 ''',
-        'check': lambda code, output: code.count("=") >= 3 and code.count("print(") >= 3
+        'check': lambda code, output: "input(" in code and code.count("input(") >= 3 and "print(" in code
     },
     'lesson3': {
         'title': 'Rechnen mit Python',
         'world': 1,
         'reward': 150,
-        'task': 'Benutze Python als Taschenrechner.',
-        'hint': 'Operatoren: + (plus), - (minus), * (mal), / (geteilt)\nBeispiel: summe = 10 + 5\nErstelle Variablen und berechne damit.',
-        'starter': '''# AUFGABE: Benutze Python als Taschenrechner
-# Operatoren: + (plus), - (minus), * (mal), / (geteilt)
-# Beispiel: summe = 10 + 5
+        'task': 'Erstelle einen einfachen Rechner, der zwei Zahlen addiert und das Ergebnis anzeigt.',
+        'hint': 'Nutze int() um Text in Zahlen umzuwandeln.\nOperatoren: + (plus), - (minus), * (mal), / (geteilt)\nBeispiel: summe = zahl1 + zahl2',
+        'starter': '''# Erwartete Ausgabe:
+# Gib die erste Zahl ein: 15
+# Gib die zweite Zahl ein: 27
+# Die Summe ist: 42
 
 # Dein Code:
 
 ''',
-        'check': lambda code, output: "+" in code or "*" in code
+        'check': lambda code, output: "input(" in code and ("+" in code or "*" in code or "-" in code or "/" in code)
     },
     'lesson4': {
         'title': 'Strings & Text',
         'world': 1,
         'reward': 200,
-        'task': 'Kombiniere Text und Variablen mit f-Strings.',
-        'hint': 'f-String Format: f"Text {variable} mehr Text"\nBeispiel: print(f"Hallo {name}")\nSchreibe einen Satz über dich.',
-        'starter': '''# AUFGABE: Kombiniere Text und Variablen mit f-Strings
-# f-String Format: f"Text {variable} mehr Text"
-# Beispiel: print(f"Ich bin {name}")
+        'task': 'Erstelle ein Programm, das nach Name und Lieblingsfarbe fragt und einen personalisierten Text ausgibt.',
+        'hint': 'f-String Format: f"Text {variable} mehr Text"\nBeispiel: print(f"Hallo {name}, deine Lieblingsfarbe ist {farbe}!")\nVerwende input() und f-Strings zusammen.',
+        'starter': '''# Erwartete Ausgabe:
+# Wie heißt du? Anna
+# Was ist deine Lieblingsfarbe? Blau
+# Hallo Anna, deine Lieblingsfarbe ist Blau!
 
 # Dein Code:
 
 ''',
-        'check': lambda code, output: "f\"" in code or "f'" in code
+        'check': lambda code, output: ("f\"" in code or "f'" in code) and "input(" in code
     },
     'lesson5': {
         'title': 'Listen & Sammlungen',
@@ -657,32 +675,39 @@ LESSONS = {
         'title': 'if/else Entscheidungen',
         'world': 2,
         'reward': 250,
-        'task': 'Triff Entscheidungen mit if/else.',
-        'hint': 'Vergleiche: == (gleich), > (größer), < (kleiner), >= (größer gleich)\nBeispiel: if alter >= 18:\nSchreibe eine if/else Bedingung.',
-        'starter': '''# AUFGABE: Triff Entscheidungen mit if/else
-# Vergleiche: == (gleich), > (größer), < (kleiner)
-# Beispiel: if alter >= 18:
-#     print("Erwachsen")
+        'task': 'Erstelle ein Programm, das nach dem Alter fragt und prüft, ob jemand erwachsen ist.',
+        'hint': 'Vergleiche: == (gleich), > (größer), < (kleiner), >= (größer gleich)\nBeispiel: if alter >= 18:\n    print("Erwachsen")\nelse:\n    print("Kind")\nNutze int() um die Eingabe in eine Zahl umzuwandeln.',
+        'starter': '''# Erwartete Ausgabe (Beispiel 1):
+# Wie alt bist du? 20
+# Du bist erwachsen!
+
+# Erwartete Ausgabe (Beispiel 2):
+# Wie alt bist du? 15
+# Du bist noch ein Kind!
 
 # Dein Code:
 
 ''',
-        'check': lambda code, output: "if" in code and "else" in code
+        'check': lambda code, output: "if" in code and "else" in code and "input(" in code
     },
     'lesson7': {
         'title': 'Schleifen (for/while)',
         'world': 2,
         'reward': 300,
-        'task': 'Wiederhole Aktionen mit einer for-Schleife.',
-        'hint': 'for-Schleife: for variable in range(start, ende):\nBeispiel: for i in range(1, 6):\nrange(1, 6) erzeugt die Zahlen 1, 2, 3, 4, 5',
-        'starter': '''# AUFGABE: Wiederhole Aktionen mit einer for-Schleife
-# for-Schleife: for i in range(1, 6):
-# range(1, 6) erzeugt: 1, 2, 3, 4, 5
+        'task': 'Erstelle ein Programm, das die Zahlen von 1 bis zu einer eingegebenen Zahl ausgibt.',
+        'hint': 'for-Schleife: for i in range(start, ende):\nBeispiel: for i in range(1, 6):\n    print(i)\nrange(1, 6) erzeugt die Zahlen 1, 2, 3, 4, 5\nNutze int() für die Eingabe.',
+        'starter': '''# Erwartete Ausgabe:
+# Bis zu welcher Zahl soll ich zählen? 5
+# 1
+# 2
+# 3
+# 4
+# 5
 
 # Dein Code:
 
 ''',
-        'check': lambda code, output: "for" in code and "range(" in code
+        'check': lambda code, output: "for" in code and "range(" in code and "input(" in code
     },
     'lesson8': {
         'title': 'Funktionen erstellen',
@@ -1134,6 +1159,9 @@ def highlight_comments():
     # Update Zeilennummern
     update_line_numbers()
 
+    # Passe Editor-Höhe automatisch an
+    auto_resize_editor()
+
 def update_line_numbers():
     """Aktualisiert die Zeilennummern basierend auf der Anzahl der Zeilen"""
     line_numbers_div = document['lineNumbers']
@@ -1148,6 +1176,25 @@ def update_line_numbers():
     # Erstelle Zeilennummern
     numbers_html = '<br>'.join([str(i + 1) for i in range(line_count)])
     line_numbers_div.innerHTML = numbers_html
+
+def auto_resize_editor():
+    """Passt die Höhe des Editors automatisch an den Inhalt an"""
+    editor = document['codeEditor']
+
+    # Berechne die benötigte Höhe basierend auf dem Inhalt
+    # Minimum 200px, Maximum 600px
+    line_height = 1.6 * 14  # line-height * font-size
+    text = editor.innerText if hasattr(editor, 'innerText') else editor.textContent
+    lines = text.split('\n')
+    line_count = len(lines)
+
+    # Berechne Höhe (30px padding oben/unten berücksichtigen)
+    calculated_height = (line_count * line_height) + 30
+
+    # Begrenze auf min/max
+    new_height = max(200, min(600, calculated_height))
+
+    editor.style.height = f'{new_height}px'
 
 def toggle_line_numbers(show):
     """Zeigt oder versteckt Zeilennummern"""
